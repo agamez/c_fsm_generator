@@ -27,7 +27,6 @@ if __name__ == "__main__":
 		fd.write(states_h_template.render(states = states, PREFIX = args['-N']))
 
 	events_h_template = ji2.get_template('events.h.j2')
-
 	events = list()
 	with open('events.csv') as csvfile:
 		events_reader = csv.DictReader(csvfile, skipinitialspace = True)
@@ -35,3 +34,15 @@ if __name__ == "__main__":
 			events.append(row)
 	with open(args['-N'] + '_fsm_events.h', 'w') as fd:
 		fd.write(events_h_template.render(events = events, PREFIX = args['-N']))
+
+	transitions_h_template = ji2.get_template('transitions.h.j2')
+	transitions = dict()
+	with open('transitions.csv') as csvfile:
+		transitions_reader = csv.DictReader(csvfile, skipinitialspace = True)
+		for row in transitions_reader:
+			if row['State'] in transitions:
+				transitions[row['State']].append(row)
+			else:
+				transitions[row['State']] = [row, ]
+	with open(args['-N'] + '_fsm_transitions.h', 'w') as fd:
+		fd.write(transitions_h_template.render(transitions = transitions, PREFIX = args['-N']))

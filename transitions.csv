@@ -1,0 +1,12 @@
+State, Event, NewState
+
+Booting, Initialize, Idle
+Booting, Error, Error
+
+Idle, Trigger, Capturing
+Idle, Error, Error
+
+Capturing, Stop, Idle
+Capturing, Error, Error
+
+Error, Reset, Idle

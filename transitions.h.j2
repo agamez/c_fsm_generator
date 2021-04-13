@@ -1,0 +1,19 @@
+{% set FSM_PREFIX = PREFIX.upper() %}
+{% set fsm_prefix = FSM_PREFIX.lower() %}
+#ifndef __{{fsm_prefix}}_fsm_transitions_h__
+#define __{{fsm_prefix}}_fsm_transitions_h__
+
+#include "fsm.h"
+
+static enum {{fsm_prefix}}_fsm_states {{fsm_prefix}}_fsm_transition[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
+{% for state_name, state in transitions.items() %}
+	[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
+	{% for st in state %}
+		[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.NewState.upper()}},
+	{% endfor %}
+	},
+{% endfor %}
+};
+
+
+#endif /* __{{fsm_prefix}}_fsm_transitions_h__ */
