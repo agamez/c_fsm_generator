@@ -25,3 +25,13 @@ if __name__ == "__main__":
 			states.append(row[0])
 	with open(args['-N'] + '_fsm_states.h', 'w') as fd:
 		fd.write(states_h_template.render(states = states, PREFIX = args['-N']))
+
+	events_h_template = ji2.get_template('events.h.j2')
+
+	events = list()
+	with open('events.csv') as csvfile:
+		events_reader = csv.DictReader(csvfile, skipinitialspace = True)
+		for row in events_reader:
+			events.append(row)
+	with open(args['-N'] + '_fsm_events.h', 'w') as fd:
+		fd.write(events_h_template.render(events = events, PREFIX = args['-N']))

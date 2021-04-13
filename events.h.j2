@@ -1,0 +1,27 @@
+{% set FSM_PREFIX = PREFIX.upper() %}
+{% set fsm_prefix = FSM_PREFIX.lower() %}
+#ifndef __{{fsm_prefix}}_fsm_events_h__
+#define __{{fsm_prefix}}_fsm_events_h__
+
+enum {{fsm_prefix}}_fsm_event_codes {
+	{{FSM_PREFIX}}_FSM_EV_NULL,
+
+{% for event in events %}
+	{{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
+{% endfor %}
+
+	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
+};
+
+static const struct {{fsm_prefix}}_fsm_event {{fsm_prefix}}_fsm_events[] = {
+{% for event in events %}
+	[{{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}}] = {
+		.code = {{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
+		.name = "{{event.Name}}",
+		.description = "{{event.Description}}",
+	},
+{% endfor %}
+};
+
+
+#endif /* __{{fsm_prefix}}_fsm_events_h__ */

@@ -1,0 +1,6 @@
+Name, Description
+Initialize, Initialization finished
+Trigger, Begin capture requested
+Stop, Stop capture requested
+Reset, Reset requested
+Error, Error event
