@@ -19,19 +19,19 @@ if __name__ == "__main__":
 	fsm_h_template = ji2.get_template('fsm.h.j2')
 
 	states = list()
-	with open('states.csv') as csvfile:
+	with open(args['-N'] + '_states.csv') as csvfile:
 		states_reader = csv.reader(csvfile, skipinitialspace = True)
 		for row in states_reader:
 			states.append(row[0])
 
 	events = list()
-	with open('events.csv') as csvfile:
+	with open(args['-N'] + '_events.csv') as csvfile:
 		events_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in events_reader:
 			events.append(row)
 
 	transitions = dict()
-	with open('transitions.csv') as csvfile:
+	with open(args['-N'] + '_transitions.csv') as csvfile:
 		transitions_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in transitions_reader:
 			if row['State'] in transitions:
@@ -41,3 +41,7 @@ if __name__ == "__main__":
 
 	with open(args['-N'] + '_fsm.h', 'w') as fd:
 		fd.write(fsm_h_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
+
+	graphviz_template = ji2.get_template('graph.dot.j2')
+	with open(args['-N'] + '_transitions.dot', 'w') as fd:
+		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
