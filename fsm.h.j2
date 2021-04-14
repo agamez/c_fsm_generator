@@ -7,7 +7,7 @@
 
 #include "fsm.h"
 
-#define {{FSM_PREFIX}}_FSM_ST_INITIAL_STATE {{FSM_PREFIX}}_FSM_ST_BOOTING
+#define {{FSM_PREFIX}}_FSM_ST_INITIAL_STATE {{FSM_PREFIX}}_FSM_ST_{{states[0].upper()}}
 
 enum {{fsm_prefix}}_fsm_states {
 	{{FSM_PREFIX}}_FSM_ST_NULL,
