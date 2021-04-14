@@ -17,11 +17,6 @@ enum fsm_states {
 	FSM_ST_NUMBER_OF_STATES
 };
 
-static const struct fsm_state *fsm_states[] = {
-	NULL,
-	NULL
-};
-
 struct fsm_state {
 	enum fsm_states code;
 	const char *name;
@@ -52,9 +47,6 @@ struct fsm {
 	const enum fsm_states ***transitions;
 };
 
-
-static const enum fsm_states fsm_transition[FSM_ST_NUMBER_OF_STATES][FSM_EV_NUMBER_OF_EVENTS] = {
-};
 
 const struct fsm_event *fsm_init(struct fsm *fsm);
 const struct fsm_event *fsm_enter(struct fsm *fsm);

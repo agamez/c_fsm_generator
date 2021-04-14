@@ -7,6 +7,15 @@ const struct fsm_event *fsm_init(struct fsm *fsm)
 {
 	printf("Initializing FSM\n\n");
 
+	static const struct fsm_state *fsm_states[] = {
+		NULL,
+		NULL
+	};
+
+	static const enum fsm_states fsm_transition[FSM_ST_NUMBER_OF_STATES][FSM_EV_NUMBER_OF_EVENTS] = {
+	};
+
+
 	fsm->states = fsm_states;
 	fsm->state = fsm->states[FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***)fsm_transition;

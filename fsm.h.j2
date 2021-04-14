@@ -24,16 +24,6 @@ enum {{fsm_prefix}}_fsm_states {
 extern const struct fsm_state {{fsm_prefix}}_fsm_state_{{state.lower()}};
 {% endfor %}
 
-static const struct fsm_state *{{fsm_prefix}}_fsm_states[] = {
-	NULL,
-
-{% for state in states %}
-	&{{fsm_prefix}}_fsm_state_{{state.lower()}},
-{% endfor %}
-
-	NULL,
-};
-
 struct {{fsm_prefix}}_fsm_state {
 	struct fsm_state;
 };
@@ -57,16 +47,6 @@ enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
 };
 
-
-static const enum {{fsm_prefix}}_fsm_states {{fsm_prefix}}_fsm_transition[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
-{% for state_name, state in transitions.items() %}
-	[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
-	{% for st in state %}
-		[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.NewState.upper()}},
-	{% endfor %}
-	},
-{% endfor %}
-};
 
 static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_enter(struct {{fsm_prefix}}_fsm *fsm)
 {
@@ -95,6 +75,27 @@ static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_init(struct {{
 		},
 	{% endfor %}
 	};
+
+	static const struct fsm_state *{{fsm_prefix}}_fsm_states[] = {
+		NULL,
+
+	{% for state in states %}
+		&{{fsm_prefix}}_fsm_state_{{state.lower()}},
+	{% endfor %}
+
+		NULL,
+	};
+
+	static const enum {{fsm_prefix}}_fsm_states {{fsm_prefix}}_fsm_transition[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
+	{% for state_name, state in transitions.items() %}
+		[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
+		{% for st in state %}
+			[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.NewState.upper()}},
+		{% endfor %}
+		},
+	{% endfor %}
+	};
+
 
 	fsm->fsm.n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
 	fsm->fsm.n_events = {{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS;
