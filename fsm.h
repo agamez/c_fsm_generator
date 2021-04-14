@@ -50,12 +50,12 @@ struct fsm {
 };
 
 
-static enum fsm_states fsm_transition[FSM_ST_NUMBER_OF_STATES][FSM_EV_NUMBER_OF_EVENTS] = {
+static const enum fsm_states fsm_transition[FSM_ST_NUMBER_OF_STATES][FSM_EV_NUMBER_OF_EVENTS] = {
 };
 
 struct fsm_event *fsm_init(struct fsm *fsm);
 struct fsm_event *fsm_enter(struct fsm *fsm);
 struct fsm_event *fsm_exit(struct fsm *fsm);
-struct fsm_event *fsm_process_event(struct fsm *fsm, struct fsm_event *event);
+struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
 
 #endif /* __state_h__ */

@@ -1,0 +1,90 @@
+{% set FSM_PREFIX = PREFIX.upper() %}
+{% set fsm_prefix = FSM_PREFIX.lower() %}
+#ifndef __{{fsm_prefix}}_fsm_h__
+#define __{{fsm_prefix}}_fsm_h__
+
+#include <stddef.h>
+
+#include "fsm.h"
+
+#define {{FSM_PREFIX}}_FSM_ST_INITIAL_STATE {{FSM_PREFIX}}_FSM_ST_BOOTING
+
+enum {{fsm_prefix}}_fsm_states {
+	{{FSM_PREFIX}}_FSM_ST_NULL,
+
+{% for state in states %}
+	{{FSM_PREFIX}}_FSM_ST_{{state.upper()}},
+{% endfor %}
+
+	{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES
+};
+
+
+{% for state in states %}
+extern const struct {{fsm_prefix}}_fsm_state {{fsm_prefix}}_fsm_state_{{state.lower()}};
+{% endfor %}
+
+static const struct {{fsm_prefix}}_fsm_state *{{fsm_prefix}}_fsm_states[] = {
+	NULL,
+
+{% for state in states %}
+	&{{fsm_prefix}}_fsm_state_{{state.lower()}},
+{% endfor %}
+
+	NULL,
+};
+
+
+
+struct art_fsm;
+
+struct art_fsm_state {
+	struct fsm_state;
+};
+
+struct art_fsm {
+	struct fsm;
+};
+
+struct art_fsm_event {
+	struct fsm_event;
+};
+
+struct art_fsm_event *art_fsm_init(struct art_fsm *fsm);
+struct art_fsm_event *art_fsm_enter(struct art_fsm *fsm);
+struct art_fsm_event *art_fsm_exit(struct art_fsm *fsm);
+struct art_fsm_event *art_fsm_process_event(struct art_fsm *fsm, const struct art_fsm_event *event);
+
+enum {{fsm_prefix}}_fsm_event_codes {
+	{{FSM_PREFIX}}_FSM_EV_NULL,
+
+{% for event in events %}
+	{{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
+{% endfor %}
+
+	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
+};
+
+static const struct {{fsm_prefix}}_fsm_event {{fsm_prefix}}_fsm_events[] = {
+{% for event in events %}
+	[{{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}}] = {
+		.code = {{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
+		.name = "{{event.Name}}",
+		.description = "{{event.Description}}",
+	},
+{% endfor %}
+};
+
+
+static const enum {{fsm_prefix}}_fsm_states {{fsm_prefix}}_fsm_transition[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
+{% for state_name, state in transitions.items() %}
+	[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
+	{% for st in state %}
+		[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.NewState.upper()}},
+	{% endfor %}
+	},
+{% endfor %}
+};
+
+
+#endif /* __{{fsm_prefix}}_fsm_h__ */

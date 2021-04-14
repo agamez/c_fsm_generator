@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
 	struct art_fsm fsm;
 
-	struct art_fsm_event *fsm_event;
+	const struct art_fsm_event *fsm_event;
 
 	fsm_event = art_fsm_init(&fsm);
 	art_fsm_process_event(&fsm, fsm_event);
