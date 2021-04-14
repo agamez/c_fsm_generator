@@ -42,13 +42,11 @@ enum fsm_event_codes {
 	FSM_EV_NUMBER_OF_EVENTS
 };
 
-static const struct fsm_event fsm_events[] = {
-};
-
 struct fsm {
 	int n_states;
 	int n_events;
 
+	const struct fsm_event *events;
 	const struct fsm_state *state;
 	const struct fsm_state **states;
 	const enum fsm_states ***transitions;
