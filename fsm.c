@@ -3,7 +3,7 @@
 
 #include "fsm.h"
 
-struct fsm_event *fsm_init(struct fsm *fsm)
+const struct fsm_event *fsm_init(struct fsm *fsm)
 {
 	printf("Initializing FSM\n\n");
 
@@ -14,7 +14,7 @@ struct fsm_event *fsm_init(struct fsm *fsm)
 	return fsm_enter(fsm);
 }
 
-struct fsm_event *fsm_enter(struct fsm *fsm)
+const struct fsm_event *fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	printf("Entering status '%s'\n", fsm->state->name);
@@ -22,7 +22,7 @@ struct fsm_event *fsm_enter(struct fsm *fsm)
 	return fsm->state->enter(fsm);
 }
 
-struct fsm_event *fsm_exit(struct fsm *fsm)
+const struct fsm_event *fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	printf("Exiting status '%s'\n\n", fsm->state->name);
@@ -30,7 +30,7 @@ struct fsm_event *fsm_exit(struct fsm *fsm)
 	return fsm->state->exit(fsm);
 }
 
-struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event)
+const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event)
 {
 	assert(fsm && fsm->state);
 	assert(event);

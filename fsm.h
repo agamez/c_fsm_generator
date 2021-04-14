@@ -3,6 +3,11 @@
 
 #include <stddef.h>
 
+#define container_of(ptr, type, member) ({ 	\
+	const typeof( ((type *)0)->member ) 	\
+	*__mptr = (ptr);			\
+	(type *)( (char *)__mptr - offsetof(type,member) );})
+
 struct fsm;
 
 #define FSM_ST_INITIAL_STATE 0
@@ -20,9 +25,9 @@ static const struct fsm_state *fsm_states[] = {
 struct fsm_state {
 	enum fsm_states code;
 	const char *name;
-	struct fsm_event *(*enter)(struct fsm *fsm);
-	struct fsm_event *(*exit)(struct fsm *fsm);
-	struct fsm_state *(*process_event)(struct fsm *fsm, struct fsm_event *event);
+	const struct fsm_event *(*enter)(struct fsm *fsm);
+	const struct fsm_event *(*exit)(struct fsm *fsm);
+	const struct fsm_state *(*process_event)(struct fsm *fsm, const struct fsm_event *event);
 };
 
 struct fsm_event {
@@ -53,9 +58,9 @@ struct fsm {
 static const enum fsm_states fsm_transition[FSM_ST_NUMBER_OF_STATES][FSM_EV_NUMBER_OF_EVENTS] = {
 };
 
-struct fsm_event *fsm_init(struct fsm *fsm);
-struct fsm_event *fsm_enter(struct fsm *fsm);
-struct fsm_event *fsm_exit(struct fsm *fsm);
-struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
+const struct fsm_event *fsm_init(struct fsm *fsm);
+const struct fsm_event *fsm_enter(struct fsm *fsm);
+const struct fsm_event *fsm_exit(struct fsm *fsm);
+const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
 
 #endif /* __state_h__ */
