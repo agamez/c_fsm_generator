@@ -33,9 +33,7 @@ const struct fsm_event *fsm_exit(struct fsm *fsm)
 const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event)
 {
 	assert(fsm && fsm->state);
-	assert(event);
-
-	if (event->code == FSM_EV_NULL) {
+	if (!event || event->code == FSM_EV_NULL) {
 		printf("Ignoring NULL event\n");
 		return NULL;
 	}
