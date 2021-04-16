@@ -3,11 +3,6 @@
 
 #include <stddef.h>
 
-#define container_of(ptr, type, member) ({ 	\
-	const typeof( ((type *)0)->member ) 	\
-	*__mptr = (ptr);			\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
-
 struct fsm;
 
 #define FSM_ST_INITIAL_STATE 0
@@ -23,12 +18,15 @@ struct fsm_state {
 	const struct fsm_event *(*enter)(struct fsm *fsm);
 	const struct fsm_event *(*exit)(struct fsm *fsm);
 	const struct fsm_state *(*process_event)(struct fsm *fsm, const struct fsm_event *event);
+
+	void *data;
 };
 
 struct fsm_event {
 	int code;
 	const char *name;
 	const char *description;
+
 	void *data;
 };
 
@@ -45,6 +43,8 @@ struct fsm {
 	const struct fsm_state *state;
 	const struct fsm_state **states;
 	const enum fsm_states ***transitions;
+
+	void *data;
 };
 
 

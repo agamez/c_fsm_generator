@@ -5,6 +5,7 @@
 
 const struct fsm_event *fsm_init(struct fsm *fsm)
 {
+	assert(fsm);
 	printf("Initializing FSM\n\n");
 
 	static const struct fsm_state *fsm_states[] = {

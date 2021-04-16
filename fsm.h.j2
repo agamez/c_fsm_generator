@@ -24,19 +24,6 @@ enum {{fsm_prefix}}_fsm_states {
 extern const struct fsm_state {{fsm_prefix}}_fsm_state_{{state.lower()}};
 {% endfor %}
 
-struct {{fsm_prefix}}_fsm_state {
-	struct fsm_state;
-};
-
-struct {{fsm_prefix}}_fsm {
-	struct fsm fsm;
-};
-
-struct {{fsm_prefix}}_fsm_event {
-	struct fsm_event;
-};
-
-
 enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NULL,
 
@@ -47,26 +34,10 @@ enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
 };
 
-
-static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_enter(struct {{fsm_prefix}}_fsm *fsm)
-{
-	return (struct {{fsm_prefix}}_fsm_event *)fsm_enter((struct fsm *)fsm);
-}
-
-static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_exit(struct {{fsm_prefix}}_fsm *fsm)
-{
-	return (struct {{fsm_prefix}}_fsm_event *)fsm_exit((struct fsm *)fsm);
-}
-
-static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_process_event(struct {{fsm_prefix}}_fsm *fsm, const struct {{fsm_prefix}}_fsm_event *event)
-{
-	return (struct {{fsm_prefix}}_fsm_event *)fsm_process_event((struct fsm *)fsm, (struct fsm_event *)event);
-}
-
-static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_init(struct {{fsm_prefix}}_fsm *fsm)
+static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm)
 {
 	// printf("Initializing {{FSM_PREFIX}}\n\n");
-	static const struct {{fsm_prefix}}_fsm_event {{fsm_prefix}}_fsm_events[] = {
+	static const struct fsm_event {{fsm_prefix}}_fsm_events[] = {
 	{% for event in events %}
 		[{{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}}] = {
 			.code = {{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
@@ -97,19 +68,19 @@ static inline struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_init(struct {{
 	};
 
 
-	fsm->fsm.n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
-	fsm->fsm.n_events = {{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS;
-	fsm->fsm.events = (const struct fsm_event *){{fsm_prefix}}_fsm_events;
-	fsm->fsm.states = (const struct fsm_state **){{fsm_prefix}}_fsm_states;
-	fsm->fsm.state = (const struct fsm_state *)fsm->fsm.states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
-	fsm->fsm.transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
+	fsm->n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
+	fsm->n_events = {{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS;
+	fsm->events = (const struct fsm_event *){{fsm_prefix}}_fsm_events;
+	fsm->states = (const struct fsm_state **){{fsm_prefix}}_fsm_states;
+	fsm->state = (const struct fsm_state *)fsm->states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
+	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
 
-	return {{fsm_prefix}}_fsm_enter(fsm);
+	return fsm_enter(fsm);
 }
 
-static inline const struct {{fsm_prefix}}_fsm_event *{{fsm_prefix}}_fsm_event(struct {{fsm_prefix}}_fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event)
+static inline const struct fsm_event *{{fsm_prefix}}_fsm_event(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event)
 {
-	return (const struct {{fsm_prefix}}_fsm_event *)&(fsm->fsm.events[event]);
+	return (const struct fsm_event *)&(fsm->events[event]);
 }
 
 #endif /* __{{fsm_prefix}}_fsm_h__ */
