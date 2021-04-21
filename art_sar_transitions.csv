@@ -10,3 +10,5 @@ Capturing, Stop, Idle
 Capturing, Error, Error
 
 Error, Reset, Idle
+
+Idle, Reinitialize, Booting
