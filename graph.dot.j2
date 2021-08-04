@@ -1,0 +1,13 @@
+{% set FSM_PREFIX = PREFIX.upper() %}
+{% set fsm_prefix = FSM_PREFIX.lower() %}
+digraph {{fsm_prefix}}_fsm {
+	node [shape = doublecircle] {{states[0]}};
+	node [shape = circle];
+
+{% for state_name, state in transitions.items() %}
+	{% for st in state %}
+	{{state_name}} -> {{st.NewState}} [label = "{{st.Event}}"];
+	{% endfor %}
+
+{% endfor %}
+}
