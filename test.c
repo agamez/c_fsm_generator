@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
 	const struct fsm_event *fsm_event;
 
-	fsm_event = art_sar_fsm_init(&fsm);
+	fsm_event = art_sar_fsm_init(&fsm, NULL);
 	fsm_process_event(&fsm, fsm_event);
 
 	fsm_event = art_sar_fsm_event(&fsm, ART_SAR_FSM_EV_TRIGGER);

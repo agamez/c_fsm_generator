@@ -35,7 +35,7 @@ enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
 };
 
-static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm)
+static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 {
 	// printf("Initializing {{FSM_PREFIX}}\n\n");
 	static const struct fsm_event {{fsm_prefix}}_fsm_events[] = {
@@ -75,6 +75,7 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm)
 	fsm->states = (const struct fsm_state **){{fsm_prefix}}_fsm_states;
 	fsm->state = (const struct fsm_state *)fsm->states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
+	fsm->data = data;
 
 	return fsm_enter(fsm);
 }

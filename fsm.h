@@ -48,7 +48,7 @@ struct fsm {
 };
 
 
-const struct fsm_event *fsm_init(struct fsm *fsm);
+const struct fsm_event *fsm_init(struct fsm *fsm, void *data);
 const struct fsm_event *fsm_enter(struct fsm *fsm);
 const struct fsm_event *fsm_exit(struct fsm *fsm);
 const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
