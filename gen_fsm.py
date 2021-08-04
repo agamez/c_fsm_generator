@@ -14,6 +14,7 @@ import jinja2
 import csv
 from inspect import getsourcefile
 import os
+import shutil
 
 if __name__ == "__main__":
 	args = docopt(__doc__)
@@ -52,3 +53,6 @@ if __name__ == "__main__":
 	graphviz_template = ji2.get_template('graph.dot.j2')
 	with open(output_prefix + '_transitions.dot', 'w') as fd:
 		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
+
+	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')
+	shutil.copyfile(gen_fsm_path + '/fsm.c', args['-O'] + '/fsm.c')
