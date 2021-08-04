@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
 Usage: gen_fsm -h
-       gen_fsm -N <fsm_name>
+       gen_fsm -N <fsm_name> -I <orig_path> -O <dest_path>
 
 Options:
+  -I <orig_path>				Origin path from which to read CSV files
+  -O <dest_path>				Destination path for generated files
   -N <fsm_name>					FSM name and prefix of C objects
 """
 
@@ -15,6 +17,8 @@ import os
 
 if __name__ == "__main__":
 	args = docopt(__doc__)
+	input_prefix = args['-I'] + '/' + args['-N']
+	output_prefix = args['-O'] + '/' + args['-N']
 
 	gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
 
@@ -22,19 +26,19 @@ if __name__ == "__main__":
 	fsm_h_template = ji2.get_template('fsm.h.j2')
 
 	states = list()
-	with open(args['-N'] + '_states.csv') as csvfile:
+	with open(input_prefix + '_states.csv') as csvfile:
 		states_reader = csv.reader(csvfile, skipinitialspace = True)
 		for row in states_reader:
 			states.append(row[0])
 
 	events = list()
-	with open(args['-N'] + '_events.csv') as csvfile:
+	with open(input_prefix + '_events.csv') as csvfile:
 		events_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in events_reader:
 			events.append(row)
 
 	transitions = dict()
-	with open(args['-N'] + '_transitions.csv') as csvfile:
+	with open(input_prefix + '_transitions.csv') as csvfile:
 		transitions_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in transitions_reader:
 			if row['State'] in transitions:
@@ -42,9 +46,9 @@ if __name__ == "__main__":
 			else:
 				transitions[row['State']] = [row, ]
 
-	with open(args['-N'] + '_fsm.h', 'w') as fd:
+	with open(output_prefix + '_fsm.h', 'w') as fd:
 		fd.write(fsm_h_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
 
 	graphviz_template = ji2.get_template('graph.dot.j2')
-	with open(args['-N'] + '_transitions.dot', 'w') as fd:
+	with open(output_prefix + '_transitions.dot', 'w') as fd:
 		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
