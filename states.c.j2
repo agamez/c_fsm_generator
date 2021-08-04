@@ -1,0 +1,34 @@
+{% set FSM_PREFIX = PREFIX.upper() %}
+{% set fsm_prefix = FSM_PREFIX.lower() %}
+#include <stddef.h>
+
+#include "{{fsm_prefix}}_fsm.h"
+
+{% for state in states %}
+/* {{state.upper()}} */
+
+static const struct fsm_event *{{state.lower()}}_enter(struct fsm *fsm)
+{
+	return NULL;
+}
+
+static const struct fsm_event *{{state.lower()}}_exit(struct fsm *fsm)
+{
+	return NULL;
+}
+
+static const struct fsm_state *{{state.lower()}}_process_event(struct fsm *fsm, const struct fsm_event *event)
+{
+	return NULL;
+}
+
+const struct fsm_state {{fsm_prefix}}_fsm_state_{{state.lower()}} = {
+	.name = "{{state.upper()}}",
+	.code = {{FSM_PREFIX}}_FSM_ST_{{state.upper()}},
+	.enter = {{state.lower()}}_enter,
+	.exit = {{state.lower()}}_exit,
+	.process_event = {{state.lower()}}_process_event,
+};
+
+
+{% endfor %}

@@ -54,5 +54,9 @@ if __name__ == "__main__":
 	with open(output_prefix + '_transitions.dot', 'w') as fd:
 		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
 
+	states_template = ji2.get_template('states.c.j2')
+	with open(output_prefix + '_states.c', 'w') as fd:
+		fd.write(states_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
+
 	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')
 	shutil.copyfile(gen_fsm_path + '/fsm.c', args['-O'] + '/fsm.c')
