@@ -10,12 +10,15 @@ Options:
 from docopt import docopt
 import jinja2
 import csv
-from os import getcwd
+from inspect import getsourcefile
+import os
 
 if __name__ == "__main__":
 	args = docopt(__doc__)
 
-	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(getcwd()), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
+	gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
+
+	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
 	fsm_h_template = ji2.get_template('fsm.h.j2')
 
 	states = list()
