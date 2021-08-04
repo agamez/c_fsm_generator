@@ -20,6 +20,7 @@ if __name__ == "__main__":
 	args = docopt(__doc__)
 	input_prefix = args['-I'] + '/' + args['-N']
 	output_prefix = args['-O'] + '/' + args['-N']
+	os.mkdir(args['-O'])
 
 	gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
 
