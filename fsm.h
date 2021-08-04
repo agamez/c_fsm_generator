@@ -17,7 +17,7 @@ struct fsm_state {
 	const char *name;
 	const struct fsm_event *(*enter)(struct fsm *fsm);
 	const struct fsm_event *(*exit)(struct fsm *fsm);
-	const struct fsm_state *(*process_event)(struct fsm *fsm, const struct fsm_event *event);
+	const struct fsm_event *(*process_event)(struct fsm *fsm, const struct fsm_event *event);
 
 	void *data;
 };

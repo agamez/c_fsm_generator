@@ -17,7 +17,7 @@ static const struct fsm_event *{{state.lower()}}_exit(struct fsm *fsm)
 	return NULL;
 }
 
-static const struct fsm_state *{{state.lower()}}_process_event(struct fsm *fsm, const struct fsm_event *event)
+static const struct fsm_event *{{state.lower()}}_process_event(struct fsm *fsm, const struct fsm_event *event)
 {
 	switch (event->code) {
 	{% for event in events %}

@@ -55,18 +55,25 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 	if (fsm->debug)
 		printf("FSM: Processing event '%s' while on status '%s'\n", event->name, fsm->state->name);
 
-	const struct fsm_state *new_state = fsm->state->process_event(fsm, event);
+	const struct fsm_event *new_event = fsm->state->process_event(fsm, event);
+	/* If an event was returned it means we are skipping the transition to new state
+	 * and are instead returning this event for further processing.
+	 * Typically this is a transition to an error state, but could be any other thing
+	 */
+	if (new_event)
+		return new_event;
 
-	/* If no new_state is received, standard transition is applied. Otherwise, let the state override matrix */
+	/* By default, however, we search for the new state on transition matrix */
 	const enum fsm_states *transition = (const enum fsm_states *)fsm->transitions;
 	transition += fsm->state->code * fsm->n_events + event->code; // Index fsm->transitions[fsm->state->code][event->code]
-	new_state = new_state ? new_state : fsm->states[*transition];
+	const struct fsm_state *new_state = fsm->states[*transition];
 
+	/* Transition to new state */
 	if (new_state) {
 		fsm_exit(fsm);
 		fsm->state = new_state;
 		fsm_enter(fsm);
 	}
 
-	return NULL;
+	return new_event;
 }
