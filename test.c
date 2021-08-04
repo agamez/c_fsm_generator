@@ -3,7 +3,9 @@
 
 int main(int argc, char *argv[])
 {
-	struct fsm fsm;
+	struct fsm fsm = {
+		.debug = 1,
+	};
 
 	const struct fsm_event *fsm_event;
 
