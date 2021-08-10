@@ -1,10 +1,12 @@
+#include <syslog.h>
+
 #include "fsm.h"
 #include "art_sar_fsm.h"
 
 int main(int argc, char *argv[])
 {
 	struct fsm fsm = {
-		.debug = 1,
+		.debug = syslog,
 	};
 
 	const struct fsm_event *fsm_event;

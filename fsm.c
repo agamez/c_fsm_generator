@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <syslog.h>
 
 #include "fsm.h"
 
@@ -7,7 +8,7 @@ const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 {
 	assert(fsm);
 	if (fsm->debug)
-		printf("Initializing FSM\n\n");
+		fsm->debug(LOG_NOTICE, "Initializing FSM\n\n");
 
 	static const struct fsm_state *fsm_states[] = {
 		NULL,
@@ -30,7 +31,7 @@ const struct fsm_event *fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	if (fsm->debug)
-		printf("Entering status '%s'\n", fsm->state->name);
+		fsm->debug(LOG_NOTICE, "Entering status '%s'\n", fsm->state->name);
 
 	return fsm->state->enter(fsm);
 }
@@ -39,7 +40,7 @@ const struct fsm_event *fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	if (fsm->debug)
-		printf("Exiting status '%s'\n\n", fsm->state->name);
+		fsm->debug(LOG_NOTICE, "Exiting status '%s'\n\n", fsm->state->name);
 
 	return fsm->state->exit(fsm);
 }
@@ -48,12 +49,10 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 {
 	assert(fsm && fsm->state);
 	if (!event || event->code == FSM_EV_NULL) {
-		if (fsm->debug)
-			printf("Ignoring NULL event\n");
 		return NULL;
 	}
 	if (fsm->debug)
-		printf("FSM: Processing event '%s' while on status '%s'\n", event->name, fsm->state->name);
+		fsm->debug(LOG_NOTICE, "FSM: Processing event '%s' while on status '%s'\n", event->name, fsm->state->name);
 
 	const struct fsm_event *new_event = fsm->state->process_event(fsm, event);
 	/* If an event was returned it means we are skipping the transition to new state

@@ -36,7 +36,7 @@ enum fsm_event_codes {
 };
 
 struct fsm {
-	int debug;
+	void (*debug)(int priority, const char *format, ...);
 
 	int n_states;
 	int n_events;
