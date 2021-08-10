@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
 Usage: gen_fsm -h
-       gen_fsm -N <fsm_name> -I <orig_path> -O <dest_path>
+       gen_fsm -N <fsm_name> -I <orig_path> -O <dest_path> [-T <templates_prefix>]
 
 Options:
   -I <orig_path>				Origin path from which to read CSV files
   -O <dest_path>				Destination path for generated files
   -N <fsm_name>					FSM name and prefix of C objects
+  -T <templates_prefix>				Location of templates and files
 """
 
 from docopt import docopt
@@ -20,9 +21,12 @@ if __name__ == "__main__":
 	args = docopt(__doc__)
 	input_prefix = args['-I'] + '/' + args['-N']
 	output_prefix = args['-O'] + '/' + args['-N']
+	if args['-T']:
+		gen_fsm_path = args['-T'] + '/'
+	else:
+		gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
 	os.mkdir(args['-O'])
 
-	gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
 
 	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
 	fsm_h_template = ji2.get_template('fsm.h.j2')
