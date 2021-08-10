@@ -37,6 +37,8 @@ enum fsm_event_codes {
 
 struct fsm {
 	void (*debug)(int priority, const char *format, ...);
+	/* Can be used with epoll() to gather when state has changed */
+	int state_changed_fd;
 
 	int n_states;
 	int n_events;

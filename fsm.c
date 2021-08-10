@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <stdio.h>
+#include <sys/eventfd.h>
 #include <syslog.h>
+#include <unistd.h>
 
 #include "fsm.h"
 
@@ -24,12 +26,16 @@ const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 	fsm->transitions = (const enum fsm_states ***)fsm_transition;
 	fsm->data = data;
 
+	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
+
 	return fsm_enter(fsm);
 }
 
 const struct fsm_event *fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
+	uint64_t inc = 1;
+	write(fsm->state_changed_fd, &inc, sizeof(inc));
 	if (fsm->debug)
 		fsm->debug(LOG_NOTICE, "Entering status '%s'\n", fsm->state->name);
 

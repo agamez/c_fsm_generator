@@ -4,6 +4,7 @@
 #ifndef __{{fsm_prefix}}_fsm_h__
 #define __{{fsm_prefix}}_fsm_h__
 
+#include <sys/eventfd.h>
 #include <stddef.h>
 
 #include "fsm.h"
@@ -68,7 +69,6 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, v
 	{% endfor %}
 	};
 
-
 	fsm->n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
 	fsm->n_events = {{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS;
 	fsm->events = (const struct fsm_event *){{fsm_prefix}}_fsm_events;
@@ -76,6 +76,7 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, v
 	fsm->state = (const struct fsm_state *)fsm->states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
 	fsm->data = data;
+	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
 
 	return fsm_enter(fsm);
 }
