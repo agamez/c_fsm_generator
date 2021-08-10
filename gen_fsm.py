@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 Usage: gen_fsm -h
        gen_fsm -N <fsm_name> -I <orig_path> -O <dest_path> [-T <templates_prefix>]
