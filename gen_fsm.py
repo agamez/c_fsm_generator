@@ -25,7 +25,7 @@ if __name__ == "__main__":
 		gen_fsm_path = args['-T'] + '/'
 	else:
 		gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
-	os.mkdir(args['-O'])
+	os.makedirs(args['-O'], exist_ok = True)
 
 
 	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
