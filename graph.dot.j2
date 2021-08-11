@@ -1,6 +1,10 @@
 {% set FSM_PREFIX = PREFIX.upper() %}
 {% set fsm_prefix = FSM_PREFIX.lower() %}
 digraph {{fsm_prefix}}_fsm {
+        nodesep = 1.0;
+        ranksep = 1.5;
+        sep = 1.0;
+
 	node [shape = doublecircle] {{states[0]}};
 	node [shape = circle];
 
