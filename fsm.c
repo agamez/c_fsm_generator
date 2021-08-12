@@ -93,9 +93,13 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 
 	/* Transition to new state */
 	if (new_state) {
-		fsm_exit(fsm);
+		const struct fsm_event *exit_event, *enter_event;
+		exit_event = fsm_exit(fsm);
 		fsm->state = new_state;
-		fsm_enter(fsm);
+		enter_event = fsm_enter(fsm);
+
+		fsm_process_event(fsm, exit_event);
+		fsm_process_event(fsm, enter_event);
 	}
 
 	return new_event;
