@@ -51,7 +51,7 @@ struct fsm {
 	void *data;
 };
 
-
+const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);
 const struct fsm_event *fsm_init(struct fsm *fsm, void *data);
 const struct fsm_event *fsm_enter(struct fsm *fsm);
 const struct fsm_event *fsm_exit(struct fsm *fsm);
