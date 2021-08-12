@@ -1,6 +1,8 @@
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/eventfd.h>
 #include <syslog.h>
 #include <unistd.h>
@@ -12,16 +14,24 @@ const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 	if (!fsm->debug)
 		return;
 
+	/* Prepend [FSM Name] to debug message */
+	char *expanded_format = NULL;
+	int ret = asprintf(&expanded_format, "[FSM %s (%d)] %s", fsm->name, priority, format);
+
 	va_list args;
 	va_start(args, format);
-	fsm->debug(priority, format, args);
+	if (ret > 0)
+		fsm->debug(priority, expanded_format, args);
+
+	free(expanded_format);
+
 	va_end(args);	
 }
 
 const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 {
 	assert(fsm);
-	fsm_debug(fsm, LOG_NOTICE, "Initializing FSM\n\n");
+	fsm_debug(fsm, LOG_NOTICE, "Initializing\n");
 
 	static const struct fsm_state *fsm_states[] = {
 		NULL,
@@ -55,7 +65,7 @@ const struct fsm_event *fsm_enter(struct fsm *fsm)
 const struct fsm_event *fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
-	fsm_debug(fsm, LOG_NOTICE, "Exiting status '%s'\n\n", fsm->state->name);
+	fsm_debug(fsm, LOG_NOTICE, "Exiting status '%s'\n", fsm->state->name);
 
 	return fsm->state->exit(fsm);
 }
@@ -66,7 +76,7 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 	if (!event || event->code == FSM_EV_NULL) {
 		return NULL;
 	}
-	fsm_debug(fsm, LOG_NOTICE, "FSM: Processing event '%s' while on status '%s'\n", event->name, fsm->state->name);
+	fsm_debug(fsm, LOG_NOTICE, "Processing event '%s' while on status '%s'\n", event->name, fsm->state->name);
 
 	const struct fsm_event *new_event = fsm->state->process_event(fsm, event);
 	/* If an event was returned it means we are skipping the transition to new state

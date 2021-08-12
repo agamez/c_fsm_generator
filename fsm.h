@@ -1,6 +1,7 @@
 #ifndef __fsm_h__
 #define __fsm_h__
 
+#include <stdarg.h>
 #include <stddef.h>
 
 struct fsm;
@@ -36,7 +37,7 @@ enum fsm_event_codes {
 };
 
 struct fsm {
-	void (*debug)(int priority, const char *format, ...);
+	void (*debug)(int priority, const char *format, va_list ap);
 	/* Can be used with epoll() to gather when state has changed */
 	int state_changed_fd;
 
