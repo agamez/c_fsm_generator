@@ -27,10 +27,7 @@ if __name__ == "__main__":
 		gen_fsm_path = os.path.dirname(getsourcefile(lambda:0))
 	os.makedirs(args['-O'], exist_ok = True)
 
-
-	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
-	fsm_h_template = ji2.get_template('fsm.h.j2')
-
+	# Read information
 	states = list()
 	with open(input_prefix + '_states.csv') as csvfile:
 		states_reader = csv.reader(csvfile, skipinitialspace = True)
@@ -52,6 +49,11 @@ if __name__ == "__main__":
 			else:
 				transitions[row['State']] = [row, ]
 
+	# Create templates environment
+	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
+
+	# Generate outputfiles
+	fsm_h_template = ji2.get_template('fsm.h.j2')
 	with open(output_prefix + '_fsm.h', 'w') as fd:
 		fd.write(fsm_h_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
 
@@ -63,5 +65,6 @@ if __name__ == "__main__":
 	with open(output_prefix + '_states.c', 'w') as fd:
 		fd.write(states_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
 
+	# Copy non template based files
 	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')
 	shutil.copyfile(gen_fsm_path + '/fsm.c', args['-O'] + '/fsm.c')
