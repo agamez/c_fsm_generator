@@ -30,7 +30,7 @@ static const struct fsm_event *{{state.lower()}}_process_event(struct fsm *fsm, 
 }
 
 const struct fsm_state {{fsm_prefix}}_fsm_state_{{state.lower()}} = {
-	.name = "{{state.upper()}}",
+	.name = "{{state}}",
 	.code = {{FSM_PREFIX}}_FSM_ST_{{state.upper()}},
 	.enter = {{state.lower()}}_enter,
 	.exit = {{state.lower()}}_exit,
