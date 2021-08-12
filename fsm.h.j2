@@ -69,6 +69,7 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, v
 	{% endfor %}
 	};
 
+	fsm->name = "{{FSM_PREFIX}}";
 	fsm->n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
 	fsm->n_events = {{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS;
 	fsm->events = (const struct fsm_event *){{fsm_prefix}}_fsm_events;

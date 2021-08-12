@@ -40,6 +40,8 @@ struct fsm {
 	/* Can be used with epoll() to gather when state has changed */
 	int state_changed_fd;
 
+	const char *name;
+
 	int n_states;
 	int n_events;
 
