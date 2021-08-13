@@ -16,7 +16,7 @@ const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 
 	/* Prepend [FSM Name] to debug message */
 	char *expanded_format = NULL;
-	int ret = asprintf(&expanded_format, "[FSM %s (%d)] %s", fsm->name, priority, format);
+	int ret = asprintf(&expanded_format, "[FSM %s (%d)] %s %s", fsm->name, priority, fsm->state->name, format);
 
 	va_list args;
 	va_start(args, format);
@@ -57,7 +57,7 @@ const struct fsm_event *fsm_enter(struct fsm *fsm)
 	assert(fsm && fsm->state);
 	uint64_t inc = 1;
 	write(fsm->state_changed_fd, &inc, sizeof(inc));
-	fsm_debug(fsm, LOG_NOTICE, "Entering status '%s'\n", fsm->state->name);
+	fsm_debug(fsm, LOG_NOTICE, "ENTER\n");
 
 	return fsm->state->enter(fsm);
 }
@@ -65,7 +65,7 @@ const struct fsm_event *fsm_enter(struct fsm *fsm)
 const struct fsm_event *fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
-	fsm_debug(fsm, LOG_NOTICE, "Exiting status '%s'\n", fsm->state->name);
+	fsm_debug(fsm, LOG_NOTICE, "EXIT\n");
 
 	return fsm->state->exit(fsm);
 }
@@ -76,7 +76,7 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 	if (!event || event->code == FSM_EV_NULL) {
 		return NULL;
 	}
-	fsm_debug(fsm, LOG_NOTICE, "Processing event '%s' while on status '%s'\n", event->name, fsm->state->name);
+	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
 	const struct fsm_event *new_event = fsm->state->process_event(fsm, event);
 	/* If an event was returned it means we are skipping the transition to new state
