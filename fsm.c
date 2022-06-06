@@ -43,6 +43,7 @@ const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 
 
 	fsm->states = fsm_states;
+	fsm->prev_state = NULL;
 	fsm->state = fsm->states[FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***)fsm_transition;
 	fsm->data = data;
@@ -95,6 +96,7 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 	if (new_state) {
 		const struct fsm_event *exit_event, *enter_event;
 		exit_event = fsm_exit(fsm);
+		fsm->prev_state = fsm->state;
 		fsm->state = new_state;
 		enter_event = fsm_enter(fsm);
 
