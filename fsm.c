@@ -21,7 +21,7 @@ const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 	va_list args;
 	va_start(args, format);
 	if (ret > 0)
-		fsm->debug(priority, expanded_format, args);
+		fsm->debug(fsm, priority, expanded_format, args);
 
 	free(expanded_format);
 
