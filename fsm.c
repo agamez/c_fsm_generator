@@ -50,6 +50,10 @@ const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 
 	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
 
+	STAILQ_INIT(&fsm->fifo);
+	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
+	pthread_mutex_init(&fsm->fifo_mutex, NULL);
+
 	return fsm_enter(fsm);
 }
 
@@ -69,6 +73,39 @@ const struct fsm_event *fsm_exit(struct fsm *fsm)
 	fsm_debug(fsm, LOG_NOTICE, "EXIT\n");
 
 	return fsm->state->exit(fsm);
+}
+
+const void fsm_fifo_add_event(struct fsm *fsm, const struct fsm_event *event)
+{
+	struct fsm_event_member *m = calloc(1, sizeof(*m));
+	m->event = event;
+
+	pthread_mutex_lock(&fsm->fifo_mutex);
+
+	STAILQ_INSERT_TAIL(&fsm->fifo, m, fifo);
+
+	uint64_t inc = 1;
+	write(fsm->fifo_added_fd, &inc, sizeof(inc));
+
+	pthread_mutex_unlock(&fsm->fifo_mutex);
+}
+
+const struct fsm_event *fsm_fifo_process_event(struct fsm *fsm)
+{
+	pthread_mutex_lock(&fsm->fifo_mutex);
+
+	struct fsm_event_member *m = STAILQ_FIRST(&fsm->fifo);
+
+	uint64_t dec;
+	read(fsm->fifo_added_fd, &dec, sizeof(dec));
+
+	pthread_mutex_unlock(&fsm->fifo_mutex);
+
+	const struct fsm_event *event = fsm_process_event(fsm, m->event);
+	STAILQ_REMOVE_HEAD(&fsm->fifo, fifo);
+	free(m);
+
+	return event;
 }
 
 const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event)

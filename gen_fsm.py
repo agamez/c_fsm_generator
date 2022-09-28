@@ -68,3 +68,4 @@ if __name__ == "__main__":
 	# Copy non template based files
 	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')
 	shutil.copyfile(gen_fsm_path + '/fsm.c', args['-O'] + '/fsm.c')
+	shutil.copyfile(gen_fsm_path + '/freebsd-queue.h', args['-O'] + '/freebsd-queue.h')

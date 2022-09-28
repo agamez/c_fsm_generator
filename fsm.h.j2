@@ -78,6 +78,10 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, v
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
 	fsm->data = data;
 	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
+	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
+
+	STAILQ_INIT(&fsm->fifo);
+	pthread_mutex_init(&fsm->fifo_mutex, NULL);
 
 	return fsm_enter(fsm);
 }

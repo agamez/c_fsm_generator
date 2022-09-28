@@ -4,6 +4,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include <pthread.h>
+#include "freebsd-queue.h"
+
 struct fsm;
 
 #define FSM_ST_INITIAL_STATE 0
@@ -36,6 +39,11 @@ enum fsm_event_codes {
 	FSM_EV_NUMBER_OF_EVENTS
 };
 
+struct fsm_event_member {
+	const struct fsm_event *event;
+	STAILQ_ENTRY(fsm_event_member) fifo;
+};
+
 struct fsm {
 	void (*debug)(struct fsm *fsm, int priority, const char *format, va_list ap);
 	/* Can be used with epoll() to gather when state has changed */
@@ -52,6 +60,11 @@ struct fsm {
 	const enum fsm_states ***transitions;
 
 	void *data;
+
+	/* Can be used with epoll() to gather when new event is available on the FIFO */
+	int fifo_added_fd;
+	STAILQ_HEAD(fifo, fsm_event_member) fifo;
+	pthread_mutex_t fifo_mutex;
 };
 
 const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);
@@ -59,5 +72,9 @@ const struct fsm_event *fsm_init(struct fsm *fsm, void *data);
 const struct fsm_event *fsm_enter(struct fsm *fsm);
 const struct fsm_event *fsm_exit(struct fsm *fsm);
 const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
+
+const void fsm_fifo_add_event(struct fsm *fsm, const struct fsm_event *event);
+const struct fsm_event *fsm_fifo_process_event(struct fsm *fsm);
+
 
 #endif /* __state_h__ */
