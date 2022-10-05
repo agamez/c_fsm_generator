@@ -71,10 +71,10 @@ const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);
 const struct fsm_event *fsm_init(struct fsm *fsm, void *data);
 const struct fsm_event *fsm_enter(struct fsm *fsm);
 const struct fsm_event *fsm_exit(struct fsm *fsm);
-const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
+int fsm_process_event(struct fsm *fsm, const struct fsm_event *event);
 
 const void fsm_fifo_add_event(struct fsm *fsm, const struct fsm_event *event);
-const struct fsm_event *fsm_fifo_process_event(struct fsm *fsm);
+int fsm_fifo_process_event(struct fsm *fsm);
 
 
 #endif /* __state_h__ */

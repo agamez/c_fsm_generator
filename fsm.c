@@ -90,7 +90,7 @@ const void fsm_fifo_add_event(struct fsm *fsm, const struct fsm_event *event)
 	pthread_mutex_unlock(&fsm->fifo_mutex);
 }
 
-const struct fsm_event *fsm_fifo_process_event(struct fsm *fsm)
+int fsm_fifo_process_event(struct fsm *fsm)
 {
 	pthread_mutex_lock(&fsm->fifo_mutex);
 
@@ -101,19 +101,19 @@ const struct fsm_event *fsm_fifo_process_event(struct fsm *fsm)
 
 	pthread_mutex_unlock(&fsm->fifo_mutex);
 
-	const struct fsm_event *event = fsm_process_event(fsm, m->event);
+	int ret = fsm_process_event(fsm, m->event);
 	STAILQ_REMOVE_HEAD(&fsm->fifo, fifo);
 	free(m);
 
-	return event;
+	return ret;
 }
 
-const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_event *event)
+int fsm_process_event(struct fsm *fsm, const struct fsm_event *event)
 {
 	assert(fsm && fsm->state);
-	if (!event || event->code == FSM_EV_NULL) {
-		return NULL;
-	}
+	if (!event || event->code == FSM_EV_NULL)
+		return -1;
+
 	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
 	const struct fsm_event *new_event = fsm->state->process_event(fsm, event);
@@ -122,7 +122,7 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 	 * Typically this is a transition to an error state, but could be any other thing
 	 */
 	if (new_event)
-		return new_event;
+		return fsm_process_event(fsm, new_event);
 
 	/* By default, however, we search for the new state on transition matrix */
 	const enum fsm_states *transition = (const enum fsm_states *)fsm->transitions;
@@ -141,5 +141,5 @@ const struct fsm_event *fsm_process_event(struct fsm *fsm, const struct fsm_even
 		fsm_process_event(fsm, enter_event);
 	}
 
-	return new_event;
+	return 0;
 }
