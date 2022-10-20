@@ -6,6 +6,7 @@
 
 #include <sys/eventfd.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "fsm.h"
 
@@ -89,6 +90,19 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, v
 static inline const struct fsm_event *{{fsm_prefix}}_fsm_event(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event)
 {
 	return (const struct fsm_event *)&(fsm->events[event]);
+}
+
+static inline struct fsm_event *{{fsm_prefix}}_fsm_event_allocated(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event, void *user_data)
+{
+	struct fsm_event *ev = calloc(1, sizeof(*ev));
+	if (!ev)
+		return NULL;
+
+	*ev = *{{fsm_prefix}}_fsm_event(fsm, event);
+	ev->data = user_data;
+	ev->is_allocated = 1;
+
+	return ev;
 }
 
 #endif /* __{{fsm_prefix}}_fsm_h__ */
