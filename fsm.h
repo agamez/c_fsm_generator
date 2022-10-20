@@ -31,6 +31,8 @@ struct fsm_event {
 	const char *name;
 	const char *description;
 
+	int is_allocated;
+
 	void *data;
 };
 
