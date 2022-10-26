@@ -9,7 +9,7 @@
 
 #include "fsm.h"
 
-const void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
+void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 {
 	if (!fsm->debug)
 		return;
@@ -108,7 +108,7 @@ int fsm_fifo_process_event(struct fsm *fsm)
 	return ret;
 }
 
-int fsm_process_event(struct fsm *fsm, const struct fsm_event *event)
+int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 {
 	assert(fsm && fsm->state);
 	if (!event || event->code == FSM_EV_NULL)
