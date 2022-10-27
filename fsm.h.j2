@@ -37,7 +37,7 @@ enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
 };
 
-static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
+static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 {
 	// printf("Initializing {{FSM_PREFIX}}\n\n");
 	static const struct fsm_event {{fsm_prefix}}_fsm_events[] = {
@@ -87,9 +87,9 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, v
 	return fsm_enter(fsm);
 }
 
-static inline const struct fsm_event *{{fsm_prefix}}_fsm_event(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event)
+static inline struct fsm_event *{{fsm_prefix}}_fsm_event(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event)
 {
-	return (const struct fsm_event *)&(fsm->events[event]);
+	return (struct fsm_event *)&(fsm->events[event]);
 }
 
 static inline struct fsm_event *{{fsm_prefix}}_fsm_event_allocated(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event, void *user_data, free_data_cb free_data_cb)

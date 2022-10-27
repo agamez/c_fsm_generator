@@ -28,7 +28,7 @@ void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 	va_end(args);	
 }
 
-const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
+struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 {
 	assert(fsm);
 	fsm_debug(fsm, LOG_NOTICE, "Initializing\n");
@@ -57,7 +57,7 @@ const struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 	return fsm_enter(fsm);
 }
 
-const struct fsm_event *fsm_enter(struct fsm *fsm)
+struct fsm_event *fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	uint64_t inc = 1;
@@ -67,7 +67,7 @@ const struct fsm_event *fsm_enter(struct fsm *fsm)
 	return fsm->state->enter(fsm);
 }
 
-const struct fsm_event *fsm_exit(struct fsm *fsm)
+struct fsm_event *fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	fsm_debug(fsm, LOG_NOTICE, "EXIT\n");
@@ -75,7 +75,7 @@ const struct fsm_event *fsm_exit(struct fsm *fsm)
 	return fsm->state->exit(fsm);
 }
 
-const void fsm_fifo_add_event(struct fsm *fsm, const struct fsm_event *event)
+void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
 {
 	struct fsm_event_member *m = calloc(1, sizeof(*m));
 	m->event = event;
@@ -116,7 +116,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
-	const struct fsm_event *new_event = fsm->state->process_event(fsm, event);
+	struct fsm_event *new_event = fsm->state->process_event(fsm, event);
 	/* If an event was returned it means we are skipping the transition to new state
 	 * and are instead returning this event for further processing.
 	 * Typically this is a transition to an error state, but could be any other thing
@@ -131,7 +131,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	/* Transition to new state */
 	if (new_state) {
-		const struct fsm_event *exit_event, *enter_event;
+		struct fsm_event *exit_event, *enter_event;
 		exit_event = fsm_exit(fsm);
 		fsm->prev_state = fsm->state;
 		fsm->state = new_state;

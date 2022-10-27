@@ -7,17 +7,17 @@
 {% for state in states %}
 /* {{state.upper()}} */
 
-static const struct fsm_event *{{state.lower()}}_enter(struct fsm *fsm)
+static struct fsm_event *{{state.lower()}}_enter(struct fsm *fsm)
 {
 	return NULL;
 }
 
-static const struct fsm_event *{{state.lower()}}_exit(struct fsm *fsm)
+static struct fsm_event *{{state.lower()}}_exit(struct fsm *fsm)
 {
 	return NULL;
 }
 
-static const struct fsm_event *{{state.lower()}}_process_event(struct fsm *fsm, const struct fsm_event *event)
+static struct fsm_event *{{state.lower()}}_process_event(struct fsm *fsm, struct fsm_event *event)
 {
 	switch (event->code) {
 	{% for event in events %}

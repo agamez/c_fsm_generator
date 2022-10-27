@@ -20,9 +20,9 @@ enum fsm_states {
 struct fsm_state {
 	enum fsm_states code;
 	const char *name;
-	const struct fsm_event *(*enter)(struct fsm *fsm);
-	const struct fsm_event *(*exit)(struct fsm *fsm);
-	const struct fsm_event *(*process_event)(struct fsm *fsm, const struct fsm_event *event);
+	struct fsm_event *(*enter)(struct fsm *fsm);
+	struct fsm_event *(*exit)(struct fsm *fsm);
+	struct fsm_event *(*process_event)(struct fsm *fsm, struct fsm_event *event);
 
 	void *data;
 };
@@ -44,7 +44,7 @@ enum fsm_event_codes {
 };
 
 struct fsm_event_member {
-	const struct fsm_event *event;
+	struct fsm_event *event;
 	STAILQ_ENTRY(fsm_event_member) fifo;
 };
 
@@ -72,12 +72,12 @@ struct fsm {
 };
 
 void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);
-const struct fsm_event *fsm_init(struct fsm *fsm, void *data);
-const struct fsm_event *fsm_enter(struct fsm *fsm);
-const struct fsm_event *fsm_exit(struct fsm *fsm);
+struct fsm_event *fsm_init(struct fsm *fsm, void *data);
+struct fsm_event *fsm_enter(struct fsm *fsm);
+struct fsm_event *fsm_exit(struct fsm *fsm);
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event);
 
-const void fsm_fifo_add_event(struct fsm *fsm, const struct fsm_event *event);
+void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event);
 int fsm_fifo_process_event(struct fsm *fsm);
 
 
