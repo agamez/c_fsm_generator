@@ -8,6 +8,7 @@
 #include "freebsd-queue.h"
 
 struct fsm;
+typedef void (*free_data_cb)(void *data);
 
 #define FSM_ST_INITIAL_STATE 0
 
@@ -34,6 +35,7 @@ struct fsm_event {
 	int is_allocated;
 
 	void *data;
+	free_data_cb free_data_cb;
 };
 
 enum fsm_event_codes {

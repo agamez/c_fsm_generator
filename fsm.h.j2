@@ -92,7 +92,7 @@ static inline const struct fsm_event *{{fsm_prefix}}_fsm_event(struct fsm *fsm, 
 	return (const struct fsm_event *)&(fsm->events[event]);
 }
 
-static inline struct fsm_event *{{fsm_prefix}}_fsm_event_allocated(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event, void *user_data)
+static inline struct fsm_event *{{fsm_prefix}}_fsm_event_allocated(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event, void *user_data, free_data_cb free_data_cb)
 {
 	struct fsm_event *ev = calloc(1, sizeof(*ev));
 	if (!ev)
@@ -100,6 +100,7 @@ static inline struct fsm_event *{{fsm_prefix}}_fsm_event_allocated(struct fsm *f
 
 	*ev = *{{fsm_prefix}}_fsm_event(fsm, event);
 	ev->data = user_data;
+	ev->free_data_cb = free_data_cb;
 	ev->is_allocated = 1;
 
 	return ev;

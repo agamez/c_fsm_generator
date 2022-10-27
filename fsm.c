@@ -141,8 +141,11 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 		fsm_process_event(fsm, enter_event);
 	}
 
-	if (event->is_allocated)
+	if (event->is_allocated) {
+		if (event->free_data_cb)
+			event->free_data_cb(event->data);
 		free(event);
+	}
 
 	return 0;
 }
