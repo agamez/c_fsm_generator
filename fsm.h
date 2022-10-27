@@ -69,6 +69,8 @@ struct fsm {
 	int fifo_added_fd;
 	STAILQ_HEAD(fifo, fsm_event_member) fifo;
 	pthread_mutex_t fifo_mutex;
+
+	struct fsm_event *last_event;
 };
 
 void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);

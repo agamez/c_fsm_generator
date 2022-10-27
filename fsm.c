@@ -116,6 +116,8 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
+	fsm->last_event = event;
+
 	struct fsm_event *new_event = fsm->state->process_event(fsm, event);
 	/* If an event was returned it means we are skipping the transition to new state
 	 * and are instead returning this event for further processing.
@@ -145,6 +147,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 		if (event->free_data_cb)
 			event->free_data_cb(event->data);
 		free(event);
+		fsm->last_event = NULL;
 	}
 
 	return 0;
