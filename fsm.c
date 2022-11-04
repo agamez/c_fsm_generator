@@ -77,6 +77,9 @@ struct fsm_event *fsm_exit(struct fsm *fsm)
 
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
 {
+	if (!event)
+		return;
+
 	struct fsm_event_member *m = calloc(1, sizeof(*m));
 	m->event = event;
 
