@@ -28,7 +28,7 @@ void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 	va_end(args);	
 }
 
-struct fsm_event *fsm_init(struct fsm *fsm, void *data)
+int fsm_init(struct fsm *fsm, void *data)
 {
 	assert(fsm);
 	fsm_debug(fsm, LOG_NOTICE, "Initializing\n");
@@ -57,7 +57,7 @@ struct fsm_event *fsm_init(struct fsm *fsm, void *data)
 	return fsm_enter(fsm);
 }
 
-struct fsm_event *fsm_enter(struct fsm *fsm)
+int fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	uint64_t inc = 1;
@@ -67,7 +67,7 @@ struct fsm_event *fsm_enter(struct fsm *fsm)
 	return fsm->state->enter(fsm);
 }
 
-struct fsm_event *fsm_exit(struct fsm *fsm)
+int fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
 	fsm_debug(fsm, LOG_NOTICE, "EXIT\n");
@@ -111,6 +111,16 @@ int fsm_fifo_process_event(struct fsm *fsm)
 	return ret;
 }
 
+void fsm_change_state(struct fsm *fsm, const struct fsm_state *new_state)
+{
+	if (new_state) {
+		fsm_exit(fsm);
+		fsm->prev_state = fsm->state;
+		fsm->state = new_state;
+		fsm_enter(fsm);
+	}
+}
+
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 {
 	assert(fsm && fsm->state);
@@ -121,33 +131,20 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	fsm->last_event = event;
 
-	struct fsm_event *new_event = NULL;
-	if (fsm->state->process_event_table[event->code])
-		new_event = (fsm->state->process_event_table[event->code])(fsm);
+	if (fsm->state->process_event_table[event->code]) {
+		int ret = (fsm->state->process_event_table[event->code])(fsm);
+		if (ret < 0)
+			return -1;
+	}
 
-	/* If an event was returned it means we are skipping the transition to new state
-	 * and are instead returning this event for further processing.
-	 * Typically this is a transition to an error state, but could be any other thing
-	 */
-	if (new_event)
-		return fsm_process_event(fsm, new_event);
+	/* If a new state was returned by the processing function, jump to it.
+	 * Otherwise, use the transition matrix to gather the new state */
 
-	/* By default, however, we search for the new state on transition matrix */
 	const enum fsm_states *transition = (const enum fsm_states *)fsm->transitions;
 	transition += fsm->state->code * fsm->n_events + event->code; // Index fsm->transitions[fsm->state->code][event->code]
 	const struct fsm_state *new_state = fsm->states[*transition];
 
-	/* Transition to new state */
-	if (new_state) {
-		struct fsm_event *exit_event, *enter_event;
-		exit_event = fsm_exit(fsm);
-		fsm->prev_state = fsm->state;
-		fsm->state = new_state;
-		enter_event = fsm_enter(fsm);
-
-		fsm_process_event(fsm, exit_event);
-		fsm_process_event(fsm, enter_event);
-	}
+	fsm_change_state(fsm, new_state);
 
 	if (event->is_allocated) {
 		if (event->free_data_cb)

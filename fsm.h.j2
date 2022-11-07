@@ -33,14 +33,14 @@ enum {{fsm_prefix}}_fsm_event_codes {
 };
 
 {% for pf in processing_functions %}
-extern struct fsm_event *{{pf}}(struct fsm *fsm);
+extern int {{pf}}(struct fsm *fsm);
 {% endfor %}
 
 {% for sf in states_functions %}
-extern struct fsm_event *{{sf}}(struct fsm *fsm);
+extern int {{sf}}(struct fsm *fsm);
 {% endfor %}
 
-static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
+static inline int {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 {
 	{% for state in states %}
 	static const fsm_process_event_cb {{state['State'].lower()}}_processing_event_table[{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {

@@ -9,7 +9,7 @@
 
 struct fsm;
 typedef void (*free_data_cb)(void *data);
-typedef struct fsm_event *(*fsm_process_event_cb)(struct fsm *fsm);
+typedef int (*fsm_process_event_cb)(struct fsm *fsm);
 
 #define FSM_ST_INITIAL_STATE 0
 
@@ -21,8 +21,8 @@ enum fsm_states {
 struct fsm_state {
 	enum fsm_states code;
 	const char *name;
-	struct fsm_event *(*enter)(struct fsm *fsm);
-	struct fsm_event *(*exit)(struct fsm *fsm);
+	int (*enter)(struct fsm *fsm);
+	int (*exit)(struct fsm *fsm);
 	const fsm_process_event_cb *process_event_table;
 
 	void *data;
@@ -75,9 +75,9 @@ struct fsm {
 };
 
 void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);
-struct fsm_event *fsm_init(struct fsm *fsm, void *data);
-struct fsm_event *fsm_enter(struct fsm *fsm);
-struct fsm_event *fsm_exit(struct fsm *fsm);
+int fsm_init(struct fsm *fsm, void *data);
+int fsm_enter(struct fsm *fsm);
+int fsm_exit(struct fsm *fsm);
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event);
 
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event);
