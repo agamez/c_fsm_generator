@@ -54,20 +54,23 @@ int fsm_exit(struct fsm *fsm)
 
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
 {
-	if (!event)
-		return;
+	if (event) {
+		struct fsm_event_member *m = calloc(1, sizeof(*m));
+		m->event = event;
 
-	struct fsm_event_member *m = calloc(1, sizeof(*m));
-	m->event = event;
+		pthread_mutex_lock(&fsm->fifo_mutex);
 
-	pthread_mutex_lock(&fsm->fifo_mutex);
+		STAILQ_INSERT_TAIL(&fsm->fifo, m, fifo);
 
-	STAILQ_INSERT_TAIL(&fsm->fifo, m, fifo);
+		uint64_t inc = 1;
+		write(fsm->fifo_added_fd, &inc, sizeof(inc));
 
-	uint64_t inc = 1;
-	write(fsm->fifo_added_fd, &inc, sizeof(inc));
-
-	pthread_mutex_unlock(&fsm->fifo_mutex);
+		pthread_mutex_unlock(&fsm->fifo_mutex);
+	} else {
+		/* An empty event simply increases fsm_fifo_process_event */
+		uint64_t inc = 1;
+		write(fsm->fifo_added_fd, &inc, sizeof(inc));
+	}
 }
 
 int fsm_fifo_process_event(struct fsm *fsm)
@@ -79,10 +82,14 @@ int fsm_fifo_process_event(struct fsm *fsm)
 	uint64_t dec;
 	read(fsm->fifo_added_fd, &dec, sizeof(dec));
 
+	int ret = 0;
+	if (m) {
+		ret = fsm_process_event(fsm, m->event);
+		STAILQ_REMOVE_HEAD(&fsm->fifo, fifo);
+	}
+
 	pthread_mutex_unlock(&fsm->fifo_mutex);
 
-	int ret = fsm_process_event(fsm, m->event);
-	STAILQ_REMOVE_HEAD(&fsm->fifo, fifo);
 	free(m);
 
 	return ret;
@@ -102,7 +109,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 {
 	assert(fsm && fsm->state);
 	if (!event || event->code == FSM_EV_NULL)
-		return -1;
+		return 0;
 
 	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
