@@ -72,6 +72,8 @@ struct fsm {
 	pthread_mutex_t fifo_mutex;
 
 	struct fsm_event *last_event;
+
+	int first_state_entered;
 };
 
 void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);

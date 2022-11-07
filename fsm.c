@@ -75,6 +75,12 @@ void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
 
 int fsm_fifo_process_event(struct fsm *fsm)
 {
+	/* Before processing any event we need to have entered first state */
+	if (!fsm->first_state_entered) {
+		fsm->first_state_entered = 1;
+		return fsm_enter(fsm);
+	}
+
 	pthread_mutex_lock(&fsm->fifo_mutex);
 
 	struct fsm_event_member *m = STAILQ_FIRST(&fsm->fifo);
