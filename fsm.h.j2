@@ -70,6 +70,16 @@ static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *d
 	{% endfor %}
 	};
 
+	static const fsm_process_event_cb {{fsm_prefix}}_fsm_event_callbacks[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
+	{% for state_name, state in processing.items() %}
+		[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
+		{% for st in state %}
+			[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.ProcessFunction.upper()}},
+		{% endfor %}
+		},
+	{% endfor %}
+	};
+
 	fsm->name = "{{FSM_PREFIX}}";
 	fsm->n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
 	fsm->n_events = {{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS;
@@ -77,6 +87,7 @@ static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *d
 	fsm->states = (const struct fsm_state **){{fsm_prefix}}_fsm_states;
 	fsm->state = (const struct fsm_state *)fsm->states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
+	fsm->event_callbacks = {{fsm_prefix}}_fsm_event_callbacks;
 	fsm->data = data;
 	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
 	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);

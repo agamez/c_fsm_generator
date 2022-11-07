@@ -62,6 +62,7 @@ struct fsm {
 	const struct fsm_state *state, *prev_state;
 	const struct fsm_state **states;
 	const enum fsm_states ***transitions;
+	const struct *event_callbacks;
 
 	void *data;
 
@@ -82,5 +83,6 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event);
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event);
 int fsm_fifo_process_event(struct fsm *fsm);
 
+typedef struct fsm_event *(*fsm_process_event_cb)(struct fsm *fsm);
 
 #endif /* __state_h__ */

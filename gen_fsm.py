@@ -49,21 +49,30 @@ if __name__ == "__main__":
 			else:
 				transitions[row['State']] = [row, ]
 
+	processing = dict()
+	with open(input_prefix + '_processing.csv') as csvfile:
+		processing_reader = csv.DictReader(csvfile, skipinitialspace = True)
+		for row in processing_reader:
+			if row['State'] in processing:
+				processing[row['State']].append(row)
+			else:
+				processing[row['State']] = [row, ]
+
 	# Create templates environment
 	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
 
 	# Generate outputfiles
 	fsm_h_template = ji2.get_template('fsm.h.j2')
 	with open(output_prefix + '_fsm.h', 'w') as fd:
-		fd.write(fsm_h_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
+		fd.write(fsm_h_template.render(states = states, events = events, transitions = transitions, processing = processing, PREFIX = args['-N']))
 
 	graphviz_template = ji2.get_template('graph.dot.j2')
 	with open(output_prefix + '_transitions.dot', 'w') as fd:
-		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
+		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, processing = processing, PREFIX = args['-N']))
 
 	states_template = ji2.get_template('states.c.j2')
 	with open(output_prefix + '_states.c', 'w') as fd:
-		fd.write(states_template.render(states = states, events = events, transitions = transitions, PREFIX = args['-N']))
+		fd.write(states_template.render(states = states, events = events, transitions = transitions, processing = processing, PREFIX = args['-N']))
 
 	# Copy non template based files
 	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')
