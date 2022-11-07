@@ -28,35 +28,6 @@ void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 	va_end(args);	
 }
 
-int fsm_init(struct fsm *fsm, void *data)
-{
-	assert(fsm);
-	fsm_debug(fsm, LOG_NOTICE, "Initializing\n");
-
-	static const struct fsm_state *fsm_states[] = {
-		NULL,
-		NULL
-	};
-
-	static const enum fsm_states fsm_transition[FSM_ST_NUMBER_OF_STATES][FSM_EV_NUMBER_OF_EVENTS] = {
-	};
-
-
-	fsm->states = fsm_states;
-	fsm->prev_state = NULL;
-	fsm->state = fsm->states[FSM_ST_INITIAL_STATE];
-	fsm->transitions = (const enum fsm_states ***)fsm_transition;
-	fsm->data = data;
-
-	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
-
-	STAILQ_INIT(&fsm->fifo);
-	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
-	pthread_mutex_init(&fsm->fifo_mutex, NULL);
-
-	return fsm_enter(fsm);
-}
-
 int fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
