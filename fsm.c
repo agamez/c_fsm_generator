@@ -64,7 +64,10 @@ int fsm_enter(struct fsm *fsm)
 	write(fsm->state_changed_fd, &inc, sizeof(inc));
 	fsm_debug(fsm, LOG_NOTICE, "ENTER\n");
 
-	return fsm->state->enter(fsm);
+	if (fsm->state->enter)
+		return fsm->state->enter(fsm);
+
+	return 0;
 }
 
 int fsm_exit(struct fsm *fsm)
@@ -72,7 +75,10 @@ int fsm_exit(struct fsm *fsm)
 	assert(fsm && fsm->state);
 	fsm_debug(fsm, LOG_NOTICE, "EXIT\n");
 
-	return fsm->state->exit(fsm);
+	if (fsm->state->exit)
+		return fsm->state->exit(fsm);
+
+	return 0;
 }
 
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
