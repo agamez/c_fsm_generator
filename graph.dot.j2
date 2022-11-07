@@ -5,12 +5,12 @@ digraph {{fsm_prefix}}_fsm {
         ranksep = 1.5;
         sep = 1.0;
 
-	node [shape = doublecircle] {{states[0]}};
+	node [shape = doublecircle] {{states[0]['State']}};
 	node [shape = circle];
 
 {% for state_name, state in transitions.items() %}
 	{% for st in state %}
-	{{state_name}} -> {{st.NewState}} [label = "{{st.Event}}"];
+	{{state_name}} -> {{st.New_State}} [label = "{{st.Event}}"];
 	{% endfor %}
 
 {% endfor %}

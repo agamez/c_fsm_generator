@@ -1,0 +1,10 @@
+State, Event, Process_Function
+
+Booting, Initialize, perform_initialization
+Booting, Error, process_error
+
+Idle, Trigger, initiate_capture
+Idle, Error, process_error
+
+Capturing, Stop, NULL
+Capturing, Error, process_error

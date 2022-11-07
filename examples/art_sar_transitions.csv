@@ -1,4 +1,4 @@
-State, Event, NewState
+State, Event, New_State
 
 Booting, Initialize, Idle
 Booting, Error, Error

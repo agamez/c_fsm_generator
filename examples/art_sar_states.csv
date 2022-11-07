@@ -1,4 +1,6 @@
-Booting
-Idle
-Capturing
-Error
+State, Enter_Function, Exit_Function
+
+Booting, booting_enter, NULL
+Idle, NULL, NULL
+Capturing, initiate_capture, NULL
+Error, NULL, NULL

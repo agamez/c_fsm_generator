@@ -10,22 +10,17 @@
 
 #include "fsm.h"
 
-#define {{FSM_PREFIX}}_FSM_ST_INITIAL_STATE {{FSM_PREFIX}}_FSM_ST_{{states[0].upper()}}
+#define {{FSM_PREFIX}}_FSM_ST_INITIAL_STATE {{FSM_PREFIX}}_FSM_ST_{{states[0]['State'].upper()}}
 
 enum {{fsm_prefix}}_fsm_states {
 	{{FSM_PREFIX}}_FSM_ST_NULL,
 
 {% for state in states %}
-	{{FSM_PREFIX}}_FSM_ST_{{state.upper()}},
+	{{FSM_PREFIX}}_FSM_ST_{{state['State'].upper()}},
 {% endfor %}
 
 	{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES
 };
-
-
-{% for state in states %}
-extern const struct fsm_state {{fsm_prefix}}_fsm_state_{{state.lower()}};
-{% endfor %}
 
 enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NULL,
@@ -37,9 +32,41 @@ enum {{fsm_prefix}}_fsm_event_codes {
 	{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS
 };
 
+{% for pf in processing_functions %}
+extern struct fsm_event *{{pf}}(struct fsm *fsm);
+{% endfor %}
+
+{% for sf in states_functions %}
+extern struct fsm_event *{{sf}}(struct fsm *fsm);
+{% endfor %}
+
 static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 {
-	// printf("Initializing {{FSM_PREFIX}}\n\n");
+	{% for state in states %}
+	static const fsm_process_event_cb {{state['State'].lower()}}_processing_event_table[{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
+		{% for processing_pair in processing[state['State']] %}
+		[{{FSM_PREFIX}}_FSM_EV_{{processing_pair.Event.upper()}}] = {{processing_pair.Process_Function}},
+		{% endfor %}
+	};
+
+	static const struct fsm_state {{fsm_prefix}}_fsm_state_{{state['State'].lower()}} = {
+		.name = "{{state['State']}}",
+		.code = {{FSM_PREFIX}}_FSM_ST_{{state['State'].upper()}},
+		.enter = {{ state['Enter_Function'] }},
+		.exit = {{ state['Exit_Function'] }},
+		.process_event_table = {{state['State'].lower()}}_processing_event_table,
+	};
+	{% endfor %}
+
+	static const struct fsm_state *{{fsm_prefix}}_fsm_states[] = {
+		NULL,
+	{% for state in states %}
+		&{{fsm_prefix}}_fsm_state_{{state['State'].lower()}},
+	{% endfor %}
+
+		NULL,
+	};
+
 	static const struct fsm_event {{fsm_prefix}}_fsm_events[] = {
 	{% for event in events %}
 		[{{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}}] = {
@@ -50,35 +77,16 @@ static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *d
 	{% endfor %}
 	};
 
-	static const struct fsm_state *{{fsm_prefix}}_fsm_states[] = {
-		NULL,
-
-	{% for state in states %}
-		&{{fsm_prefix}}_fsm_state_{{state.lower()}},
-	{% endfor %}
-
-		NULL,
-	};
-
 	static const enum {{fsm_prefix}}_fsm_states {{fsm_prefix}}_fsm_transition[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
 	{% for state_name, state in transitions.items() %}
 		[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
 		{% for st in state %}
-			[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.NewState.upper()}},
+			[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.New_State.upper()}},
 		{% endfor %}
 		},
 	{% endfor %}
 	};
 
-	static const fsm_process_event_cb {{fsm_prefix}}_fsm_event_callbacks[{{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES][{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
-	{% for state_name, state in processing.items() %}
-		[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
-		{% for st in state %}
-			[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.ProcessFunction.upper()}},
-		{% endfor %}
-		},
-	{% endfor %}
-	};
 
 	fsm->name = "{{FSM_PREFIX}}";
 	fsm->n_states = {{FSM_PREFIX}}_FSM_ST_NUMBER_OF_STATES;
@@ -87,7 +95,6 @@ static inline struct fsm_event *{{fsm_prefix}}_fsm_init(struct fsm *fsm, void *d
 	fsm->states = (const struct fsm_state **){{fsm_prefix}}_fsm_states;
 	fsm->state = (const struct fsm_state *)fsm->states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
-	fsm->event_callbacks = {{fsm_prefix}}_fsm_event_callbacks;
 	fsm->data = data;
 	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
 	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);

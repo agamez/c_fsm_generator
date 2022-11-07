@@ -29,10 +29,15 @@ if __name__ == "__main__":
 
 	# Read information
 	states = list()
+	states_functions = set()
 	with open(input_prefix + '_states.csv') as csvfile:
-		states_reader = csv.reader(csvfile, skipinitialspace = True)
+		states_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in states_reader:
-			states.append(row[0])
+			states.append(row)
+			if (row['Enter_Function'] != "NULL"):
+				states_functions.add(row['Enter_Function'])
+			if (row['Exit_Function'] != "NULL"):
+				states_functions.add(row['Exit_Function'])
 
 	events = list()
 	with open(input_prefix + '_events.csv') as csvfile:
@@ -50,13 +55,16 @@ if __name__ == "__main__":
 				transitions[row['State']] = [row, ]
 
 	processing = dict()
+	processing_functions = set()
 	with open(input_prefix + '_processing.csv') as csvfile:
 		processing_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in processing_reader:
-			if row['State'] in processing:
-				processing[row['State']].append(row)
+			state = row.pop('State')
+			if state in processing:
+				processing[state].append(row)
 			else:
-				processing[row['State']] = [row, ]
+				processing[state] = [row, ]
+			processing_functions.add(row['Process_Function'])
 
 	# Create templates environment
 	ji2 = jinja2.Environment(loader = jinja2.FileSystemLoader(gen_fsm_path), trim_blocks = True, keep_trailing_newline = True, lstrip_blocks = True)
@@ -64,15 +72,11 @@ if __name__ == "__main__":
 	# Generate outputfiles
 	fsm_h_template = ji2.get_template('fsm.h.j2')
 	with open(output_prefix + '_fsm.h', 'w') as fd:
-		fd.write(fsm_h_template.render(states = states, events = events, transitions = transitions, processing = processing, PREFIX = args['-N']))
+		fd.write(fsm_h_template.render(states = states, states_functions = states_functions, events = events, transitions = transitions, processing = processing, processing_functions = processing_functions, PREFIX = args['-N']))
 
 	graphviz_template = ji2.get_template('graph.dot.j2')
 	with open(output_prefix + '_transitions.dot', 'w') as fd:
-		fd.write(graphviz_template.render(states = states, events = events, transitions = transitions, processing = processing, PREFIX = args['-N']))
-
-	states_template = ji2.get_template('states.c.j2')
-	with open(output_prefix + '_states.c', 'w') as fd:
-		fd.write(states_template.render(states = states, events = events, transitions = transitions, processing = processing, PREFIX = args['-N']))
+		fd.write(graphviz_template.render(states = states, states_functions = states_functions, events = events, transitions = transitions, processing = processing, processing_functions = processing_functions, PREFIX = args['-N']))
 
 	# Copy non template based files
 	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')

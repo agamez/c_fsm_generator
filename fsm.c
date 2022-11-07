@@ -121,7 +121,10 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	fsm->last_event = event;
 
-	struct fsm_event *new_event = fsm->state->process_event(fsm, event);
+	struct fsm_event *new_event = NULL;
+	if (fsm->state->process_event_table[event->code])
+		new_event = (fsm->state->process_event_table[event->code])(fsm);
+
 	/* If an event was returned it means we are skipping the transition to new state
 	 * and are instead returning this event for further processing.
 	 * Typically this is a transition to an error state, but could be any other thing

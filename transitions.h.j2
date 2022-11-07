@@ -10,7 +10,7 @@ static enum {{fsm_prefix}}_fsm_states {{fsm_prefix}}_fsm_transition[{{FSM_PREFIX
 {% for state_name, state in transitions.items() %}
 	[{{FSM_PREFIX}}_FSM_ST_{{state_name.upper()}}] = {
 	{% for st in state %}
-		[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.NewState.upper()}},
+		[{{FSM_PREFIX}}_FSM_EV_{{st.Event.upper()}}] = {{FSM_PREFIX}}_FSM_ST_{{st.New_State.upper()}},
 	{% endfor %}
 	},
 {% endfor %}
