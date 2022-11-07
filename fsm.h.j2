@@ -40,7 +40,7 @@ extern int {{pf}}(struct fsm *fsm);
 extern int {{sf}}(struct fsm *fsm);
 {% endfor %}
 
-static void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
+static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 {
 	{% for state in states %}
 	static const fsm_process_event_cb {{state['State'].lower()}}_processing_event_table[{{FSM_PREFIX}}_FSM_EV_NUMBER_OF_EVENTS] = {
