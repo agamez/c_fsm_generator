@@ -75,40 +75,38 @@ void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
 
 int fsm_fifo_process_event(struct fsm *fsm)
 {
-	/* Before processing any event we need to have entered first state */
-	if (!fsm->first_state_entered) {
-		fsm->first_state_entered = 1;
-		return fsm_enter(fsm);
-	}
-
-	pthread_mutex_lock(&fsm->fifo_mutex);
-
-	struct fsm_event_member *m = STAILQ_FIRST(&fsm->fifo);
+	int ret = 0;
 
 	uint64_t dec;
 	read(fsm->fifo_added_fd, &dec, sizeof(dec));
 
-	int ret = 0;
-	if (m) {
-		ret = fsm_process_event(fsm, m->event);
-		STAILQ_REMOVE_HEAD(&fsm->fifo, fifo);
+	pthread_mutex_lock(&fsm->locked_fsm);
+
+	/* Before processing any event we need to have entered first state */
+	if (!fsm->first_state_entered) {
+		fsm->first_state_entered = 1;
+		ret = fsm_enter(fsm);
+		goto out;
 	}
 
+	pthread_mutex_lock(&fsm->fifo_mutex);
+	struct fsm_event_member *m = STAILQ_FIRST(&fsm->fifo);
 	pthread_mutex_unlock(&fsm->fifo_mutex);
 
-	free(m);
+	if (m) {
+		ret = fsm_process_event(fsm, m->event);
+
+		pthread_mutex_lock(&fsm->fifo_mutex);
+		STAILQ_REMOVE(&fsm->fifo, m, fsm_event_member, fifo);
+		pthread_mutex_unlock(&fsm->fifo_mutex);
+
+		free(m);
+	}
+
+out:
+	pthread_mutex_unlock(&fsm->locked_fsm);
 
 	return ret;
-}
-
-void fsm_change_state(struct fsm *fsm, const struct fsm_state *new_state)
-{
-	if (new_state) {
-		fsm_exit(fsm);
-		fsm->prev_state = fsm->state;
-		fsm->state = new_state;
-		fsm_enter(fsm);
-	}
 }
 
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
@@ -117,14 +115,18 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 	if (!event || event->code == FSM_EV_NULL)
 		return 0;
 
+	pthread_mutex_lock(&fsm->locked_fsm);
+
 	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
 	fsm->last_event = event;
 
 	if (fsm->state->process_event_table[event->code]) {
 		int ret = (fsm->state->process_event_table[event->code])(fsm);
-		if (ret < 0)
-			return -1;
+		if (ret < 0) {
+			pthread_mutex_unlock(&fsm->locked_fsm);
+			return ret;
+		}
 	}
 
 	/* If a new state was returned by the processing function, jump to it.
@@ -134,7 +136,12 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 	transition += fsm->state->code * fsm->n_events + event->code; // Index fsm->transitions[fsm->state->code][event->code]
 	const struct fsm_state *new_state = fsm->states[*transition];
 
-	fsm_change_state(fsm, new_state);
+	if (new_state) {
+		fsm_exit(fsm);
+		fsm->prev_state = fsm->state;
+		fsm->state = new_state;
+		fsm_enter(fsm);
+	}
 
 	if (event->is_allocated) {
 		if (event->free_data_cb)
@@ -142,6 +149,8 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 		free(event);
 		fsm->last_event = NULL;
 	}
+
+	pthread_mutex_unlock(&fsm->locked_fsm);
 
 	return 0;
 }

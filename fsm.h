@@ -74,6 +74,8 @@ struct fsm {
 	struct fsm_event *last_event;
 
 	int first_state_entered;
+
+	pthread_mutex_t locked_fsm;
 };
 
 void fsm_debug(struct fsm *fsm, int priority, const char *format, ...);

@@ -101,6 +101,7 @@ static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 
 	STAILQ_INIT(&fsm->fifo);
 	pthread_mutex_init(&fsm->fifo_mutex, NULL);
+	pthread_mutex_init(&fsm->locked_fsm, NULL);
 
 	/* Add a NULL event to the FIFO to notify user that he still needs to enter() initial state */
 	fsm_fifo_add_event(fsm, NULL);
