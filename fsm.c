@@ -113,9 +113,11 @@ out:
 
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 {
+	int ret = 0;
+
 	assert(fsm && fsm->state);
 	if (!event || event->code == FSM_EV_NULL)
-		return 0;
+		return ret;
 
 	pthread_mutex_lock(&fsm->locked_fsm);
 
@@ -124,11 +126,9 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 	fsm->last_event = event;
 
 	if (fsm->state->process_event_table[event->code]) {
-		int ret = (fsm->state->process_event_table[event->code])(fsm);
-		if (ret < 0) {
-			pthread_mutex_unlock(&fsm->locked_fsm);
-			return ret;
-		}
+		ret = (fsm->state->process_event_table[event->code])(fsm);
+		if (ret < 0)
+			goto out;
 	}
 
 	/* If a new state was returned by the processing function, jump to it.
@@ -152,6 +152,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 		fsm->last_event = NULL;
 	}
 
+out:
 	pthread_mutex_unlock(&fsm->locked_fsm);
 
 	return 0;

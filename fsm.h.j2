@@ -7,6 +7,7 @@
 #include <sys/eventfd.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "fsm.h"
 
@@ -100,8 +101,12 @@ static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
 
 	STAILQ_INIT(&fsm->fifo);
-	pthread_mutex_init(&fsm->fifo_mutex, NULL);
-	pthread_mutex_init(&fsm->locked_fsm, NULL);
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+
+	pthread_mutex_init(&fsm->fifo_mutex, &attr);
+	pthread_mutex_init(&fsm->locked_fsm, &attr);
 
 	/* Add a NULL event to the FIFO to notify user that he still needs to enter() initial state */
 	fsm_fifo_add_event(fsm, NULL);
