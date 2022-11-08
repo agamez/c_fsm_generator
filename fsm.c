@@ -31,14 +31,16 @@ void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 int fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
-	uint64_t inc = 1;
-	write(fsm->state_changed_fd, &inc, sizeof(inc));
 	fsm_debug(fsm, LOG_NOTICE, "ENTER\n");
 
+	int ret;
 	if (fsm->state->enter)
-		return fsm->state->enter(fsm);
+		ret = fsm->state->enter(fsm);
 
-	return 0;
+	uint64_t inc = 1;
+	write(fsm->state_changed_fd, &inc, sizeof(inc));
+
+	return ret;
 }
 
 int fsm_exit(struct fsm *fsm)
