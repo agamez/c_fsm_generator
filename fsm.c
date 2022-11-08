@@ -56,57 +56,57 @@ int fsm_exit(struct fsm *fsm)
 
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event)
 {
-	if (event) {
-		struct fsm_event_member *m = calloc(1, sizeof(*m));
-		m->event = event;
-
-		pthread_mutex_lock(&fsm->fifo_mutex);
-
-		STAILQ_INSERT_TAIL(&fsm->fifo, m, fifo);
-
-		uint64_t inc = 1;
-		write(fsm->fifo_added_fd, &inc, sizeof(inc));
-
-		pthread_mutex_unlock(&fsm->fifo_mutex);
-	} else {
-		/* An empty event simply increases fsm_fifo_process_event */
-		uint64_t inc = 1;
-		write(fsm->fifo_added_fd, &inc, sizeof(inc));
-	}
-}
-
-int fsm_fifo_process_event(struct fsm *fsm)
-{
-	int ret = 0;
-
-	uint64_t dec;
-	read(fsm->fifo_added_fd, &dec, sizeof(dec));
-
-	pthread_mutex_lock(&fsm->locked_fsm);
-
-	/* Before processing any event we need to have entered first state */
-	if (!fsm->first_state_entered) {
-		fsm->first_state_entered = 1;
-		ret = fsm_enter(fsm);
-		goto out;
-	}
+	struct fsm_event_member *m = calloc(1, sizeof(*m));
+	m->event = event;
 
 	pthread_mutex_lock(&fsm->fifo_mutex);
-	struct fsm_event_member *m = STAILQ_FIRST(&fsm->fifo);
+	STAILQ_INSERT_TAIL(&fsm->fifo, m, fifo);
+
+	uint64_t inc = 1;
+	write(fsm->fifo_added_fd, &inc, sizeof(inc));
 	pthread_mutex_unlock(&fsm->fifo_mutex);
+}
 
-	if (m) {
-		ret = fsm_process_event(fsm, m->event);
+int fsm_fifo_process_events(struct fsm *fsm)
+{
+	int ret = 0;
+	uint64_t dec;
 
+	do {
+		/* First, try to gather exclusive access to the FIFO */
 		pthread_mutex_lock(&fsm->fifo_mutex);
+
+		ret = read(fsm->fifo_added_fd, &dec, sizeof(dec));
+		/* If we couldn't read from fifo_added_fd, it means that some thread got here before us */
+		if (ret < 0) {
+			pthread_mutex_unlock(&fsm->fifo_mutex);
+			return 0;
+		}
+
+		/* If we were able to decrement fifo_added_fd, there must be something in the FIFO that belongs to us */
+		struct fsm_event_member *m;
+		m = STAILQ_FIRST(&fsm->fifo);
 		STAILQ_REMOVE(&fsm->fifo, m, fsm_event_member, fifo);
+
 		pthread_mutex_unlock(&fsm->fifo_mutex);
 
-		free(m);
-	}
+		/* Once we own the FSM we can proceed with the processing */
+		pthread_mutex_lock(&fsm->locked_fsm);
 
-out:
-	pthread_mutex_unlock(&fsm->locked_fsm);
+		/* Before processing any event we need to have entered first state */
+		if (!fsm->first_state_entered) {
+			ret = fsm_enter(fsm);
+			fsm->first_state_entered = 1;
+		}
+
+		if (m)
+			ret = fsm_process_event(fsm, m->event);
+
+		free(m);
+
+		pthread_mutex_unlock(&fsm->locked_fsm);
+	} while (dec > 0);
+
 
 	return ret;
 }

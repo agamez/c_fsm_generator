@@ -85,7 +85,7 @@ int fsm_exit(struct fsm *fsm);
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event);
 
 void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event);
-int fsm_fifo_process_event(struct fsm *fsm);
+int fsm_fifo_process_events(struct fsm *fsm);
 
 
 #endif /* __state_h__ */
