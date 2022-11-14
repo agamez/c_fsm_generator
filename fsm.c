@@ -33,7 +33,7 @@ int fsm_enter(struct fsm *fsm)
 	assert(fsm && fsm->state);
 	fsm_debug(fsm, LOG_NOTICE, "ENTER\n");
 
-	int ret;
+	int ret = 0;
 	if (fsm->state->enter)
 		ret = fsm->state->enter(fsm);
 
