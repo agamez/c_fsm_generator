@@ -45,14 +45,29 @@ if __name__ == "__main__":
 		for row in events_reader:
 			events.append(row)
 
+
 	transitions = dict()
+	def add_transition(state, row):
+		if state in transitions:
+			append = True
+			for t in transitions[state]:
+				if t['Event'] == row['Event']:
+					append = False
+
+			if append: transitions[state].append(row)
+		else:
+			transitions[state] = [row, ]
+
 	with open(input_prefix + '_transitions.csv') as csvfile:
 		transitions_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in transitions_reader:
-			if row['State'] in transitions:
-				transitions[row['State']].append(row)
+			state = row.pop('State')
+			if state == '*':
+				for state in states:
+					add_transition(state['State'], row)
 			else:
-				transitions[row['State']] = [row, ]
+				add_transition(state, row)
+
 
 	processing = dict()
 	processing_functions = set()
