@@ -46,47 +46,40 @@ if __name__ == "__main__":
 			events.append(row)
 
 
-	transitions = dict()
-	def add_transition(state, row):
-		if state in transitions:
+	def add_to_table(dest, state, row):
+		if state in dest:
 			append = True
-			for t in transitions[state]:
-				if t['Event'] == row['Event']:
+			for d in dest[state]:
+				if d['Event'] == row['Event']:
 					append = False
 
-			if append: transitions[state].append(row)
+			if append: dest[state].append(row)
 		else:
-			transitions[state] = [row, ]
+			dest[state] = [row, ]
 
+	transitions = dict()
 	with open(input_prefix + '_transitions.csv') as csvfile:
 		transitions_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in transitions_reader:
 			state = row.pop('State')
 			if state == '*':
 				for state in states:
-					add_transition(state['State'], row)
+					add_to_table(transitions, state['State'], row)
 			else:
-				add_transition(state, row)
+				add_to_table(transitions, state, row)
 
 
 	processing = dict()
 	processing_functions = set()
-	def add_processing_function(state, row):
-		if state in processing:
-			processing[state].append(row)
-		else:
-			processing[state] = [row, ]
-		processing_functions.add(row['Process_Function'])
-
 	with open(input_prefix + '_processing.csv') as csvfile:
 		processing_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in processing_reader:
 			state = row.pop('State')
 			if state == '*':
 				for state in states:
-					add_processing_function(state['State'], row)
+					add_to_table(processing, state['State'], row)
 			else:
-				add_processing_function(state, row)
+				add_to_table(processing, state, row)
 			processing_functions.add(row['Process_Function'])
 
 	# Create templates environment
