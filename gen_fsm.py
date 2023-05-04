@@ -56,14 +56,22 @@ if __name__ == "__main__":
 
 	processing = dict()
 	processing_functions = set()
+	def add_processing_function(state, row):
+		if state in processing:
+			processing[state].append(row)
+		else:
+			processing[state] = [row, ]
+		processing_functions.add(row['Process_Function'])
+
 	with open(input_prefix + '_processing.csv') as csvfile:
 		processing_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in processing_reader:
 			state = row.pop('State')
-			if state in processing:
-				processing[state].append(row)
+			if state == '*':
+				for state in states:
+					add_processing_function(state['State'], row)
 			else:
-				processing[state] = [row, ]
+				add_processing_function(state, row)
 			processing_functions.add(row['Process_Function'])
 
 	# Create templates environment
