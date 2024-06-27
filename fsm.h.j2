@@ -74,6 +74,7 @@ static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 			.code = {{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
 			.name = "{{event.Name}}",
 			.description = "{{event.Description}}",
+			.notify = {{event.Notify_Event}},
 		},
 	{% endfor %}
 	};

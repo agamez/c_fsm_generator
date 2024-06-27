@@ -121,7 +121,8 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	pthread_mutex_lock(&fsm->locked_fsm);
 
-	fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
+	if (event->notify)
+		fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
 
 	fsm->last_event = event;
 
