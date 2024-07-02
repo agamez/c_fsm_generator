@@ -139,7 +139,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 	transition += fsm->state->code * fsm->n_events + event->code; // Index fsm->transitions[fsm->state->code][event->code]
 	const struct fsm_state *new_state = fsm->states[*transition];
 
-	if (new_state) {
+	if (new_state && fsm->state != new_state) {
 		fsm_exit(fsm);
 		fsm->prev_state = fsm->state;
 		fsm->state = new_state;
