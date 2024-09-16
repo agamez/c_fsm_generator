@@ -21,6 +21,8 @@ enum fsm_states {
 struct fsm_state {
 	enum fsm_states code;
 	const char *name;
+	int notify_level;
+
 	int (*enter)(struct fsm *fsm);
 	int (*exit)(struct fsm *fsm);
 	const fsm_process_event_cb *process_event_table;
@@ -32,7 +34,7 @@ struct fsm_event {
 	int code;
 	const char *name;
 	const char *description;
-	int notify;
+	int notify_level;
 
 	int is_allocated;
 

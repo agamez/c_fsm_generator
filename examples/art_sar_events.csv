@@ -1,10 +1,10 @@
-Name, Description, Notify_Event
+Name, Description, Notify_Level
 
-Initialize, Initialization finished, 1
-Trigger, Begin capture requested, 1
-Stop, Stop capture requested, 1
-Reset, Reset requested, 1
-Error, Error event, 1
-Reinitialize, Reinitialization requested, 1
-Periodic_Timer, Periodic timer event, 0
+Initialize, Initialization finished, LOG_NOTICE
+Trigger, Begin capture requested, LOG_NOTICE
+Stop, Stop capture requested, LOG_NOTICE
+Reset, Reset requested, LOG_WARNING
+Error, Error event, LOG_ERR
+Reinitialize, Reinitialization requested, LOG_NOTICE
+Periodic_Timer, Periodic timer event, LOG_DEBUG
 

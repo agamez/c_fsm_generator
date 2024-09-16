@@ -1,6 +1,6 @@
-State, Enter_Function, Exit_Function
+State, Enter_Function, Exit_Function, Notify_Level
 
-Booting, booting_enter, NULL
-Idle, NULL, NULL
-Capturing, initiate_capture, NULL
-Error, NULL, NULL
+Booting, booting_enter, NULL, LOG_NOTICE
+Idle, NULL, NULL, LOG_NOTICE
+Capturing, initiate_capture, NULL, LOG_NOTICE
+Error, NULL, NULL, LOG_ERR

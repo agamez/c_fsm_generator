@@ -20,7 +20,7 @@ static const struct {{fsm_prefix}}_fsm_event {{fsm_prefix}}_fsm_events[] = {
 		.code = {{FSM_PREFIX}}_FSM_EV_{{event.Name.upper()}},
 		.name = "{{event.Name}}",
 		.description = "{{event.Description}}",
-		.notify = {{event.Notify_Event}},
+		.notify_level = {{event.Notify_Level}},
 	},
 {% endfor %}
 };

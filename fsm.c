@@ -31,7 +31,8 @@ void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 int fsm_enter(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
-	fsm_debug(fsm, LOG_NOTICE, "ENTER\n");
+	if (fsm->state->notify_level > 0)
+		fsm_debug(fsm, fsm->state->notify_level, "ENTER\n");
 
 	int ret = 0;
 	if (fsm->state->enter)
@@ -46,7 +47,8 @@ int fsm_enter(struct fsm *fsm)
 int fsm_exit(struct fsm *fsm)
 {
 	assert(fsm && fsm->state);
-	fsm_debug(fsm, LOG_NOTICE, "EXIT\n");
+	if (fsm->state->notify_level > 0)
+		fsm_debug(fsm, fsm->state->notify_level, "EXIT\n");
 
 	if (fsm->state->exit)
 		return fsm->state->exit(fsm);
@@ -121,8 +123,8 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	pthread_mutex_lock(&fsm->locked_fsm);
 
-	if (event->notify)
-		fsm_debug(fsm, LOG_NOTICE, "EVENT %s\n", event->name);
+	if (event->notify_level > 0)
+		fsm_debug(fsm, event->notify_level, "EVENT %s\n", event->name);
 
 	fsm->last_event = event;
 
