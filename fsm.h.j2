@@ -99,18 +99,18 @@ static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
 	fsm->data = data;
 	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
-	fsm->fifo_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
+	fsm->events_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
 
-	STAILQ_INIT(&fsm->fifo);
+	STAILQ_INIT(&fsm->events_fifo);
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 
-	pthread_mutex_init(&fsm->fifo_mutex, &attr);
+	pthread_mutex_init(&fsm->events_mutex, &attr);
 	pthread_mutex_init(&fsm->locked_fsm, &attr);
 
 	/* Add a NULL event to the FIFO to notify user that he still needs to enter() initial state */
-	fsm_fifo_add_event(fsm, NULL);
+	fsm_add_event(fsm, NULL);
 }
 
 static inline struct fsm_event *{{fsm_prefix}}_fsm_event(struct fsm *fsm, enum {{fsm_prefix}}_fsm_event_codes event)

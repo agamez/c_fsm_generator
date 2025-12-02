@@ -70,9 +70,9 @@ struct fsm {
 	void *data;
 
 	/* Can be used with epoll() to gather when new event is available on the FIFO */
-	int fifo_added_fd;
-	STAILQ_HEAD(fifo, fsm_event_member) fifo;
-	pthread_mutex_t fifo_mutex;
+	int events_added_fd;
+	STAILQ_HEAD(events, fsm_event_member) events_fifo;
+	pthread_mutex_t events_mutex;
 
 	struct fsm_event *last_event;
 
@@ -87,8 +87,7 @@ int fsm_enter(struct fsm *fsm);
 int fsm_exit(struct fsm *fsm);
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event);
 
-void fsm_fifo_add_event(struct fsm *fsm, struct fsm_event *event);
-int fsm_fifo_process_events(struct fsm *fsm);
-
+void fsm_add_event(struct fsm *fsm, struct fsm_event *event);
+int fsm_process_events(struct fsm *fsm);
 
 #endif /* __state_h__ */
