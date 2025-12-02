@@ -69,6 +69,17 @@ void fsm_add_event(struct fsm *fsm, struct fsm_event *event)
 	pthread_mutex_unlock(&fsm->events_mutex);
 }
 
+void fsm_add_delayed_event(struct fsm *fsm, struct fsm_event *event)
+{
+	struct fsm_event_member *m = calloc(1, sizeof(*m));
+	m->event = event;
+
+	pthread_mutex_lock(&fsm->delayed_events_mutex);
+	STAILQ_INSERT_TAIL(&fsm->delayed_events_fifo, m, fifo);
+
+	pthread_mutex_unlock(&fsm->delayed_events_mutex);
+}
+
 int fsm_process_events(struct fsm *fsm)
 {
 	int ret = 0;
@@ -113,6 +124,47 @@ int fsm_process_events(struct fsm *fsm)
 	return ret;
 }
 
+static int fsm_process_delayed_events(struct fsm *fsm)
+{
+	int ret = 0;
+
+	struct fsm_event_member *m = NULL;
+	do {
+		/* First, try to gather exclusive access to the FIFO */
+		pthread_mutex_lock(&fsm->delayed_events_mutex);
+
+		m = STAILQ_FIRST(&fsm->delayed_events_fifo);
+		if (m) {
+			STAILQ_REMOVE(&fsm->delayed_events_fifo, m, fsm_event_member, fifo);
+
+			pthread_mutex_unlock(&fsm->delayed_events_mutex);
+
+			/* Before processing any event we need to have entered first state */
+			if (!fsm->first_state_entered) {
+				ret = fsm_enter(fsm);
+				fsm->first_state_entered = 1;
+			}
+
+			ret = fsm_process_event(fsm, m->event);
+
+			free(m);
+		} else {
+			pthread_mutex_unlock(&fsm->delayed_events_mutex);
+		}
+	} while (m);
+
+
+	return ret;
+}
+
+int fsm_delay_event(struct fsm *fsm)
+{
+	fsm_add_delayed_event(fsm, fsm->last_event);
+
+	/* So we don't perform any transition */
+	return -1;
+}
+
 int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 {
 	int ret = 0;
@@ -146,6 +198,9 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 		fsm->prev_state = fsm->state;
 		fsm->state = new_state;
 		fsm_enter(fsm);
+
+		/* And now, process delayed events */
+		fsm_process_delayed_events(fsm);
 	}
 
 	if (event->is_allocated) {

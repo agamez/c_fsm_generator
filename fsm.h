@@ -72,7 +72,8 @@ struct fsm {
 	/* Can be used with epoll() to gather when new event is available on the FIFO */
 	int events_added_fd;
 	STAILQ_HEAD(events, fsm_event_member) events_fifo;
-	pthread_mutex_t events_mutex;
+	STAILQ_HEAD(delayed_events, fsm_event_member) delayed_events_fifo;
+	pthread_mutex_t events_mutex, delayed_events_mutex;
 
 	struct fsm_event *last_event;
 
@@ -89,5 +90,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event);
 
 void fsm_add_event(struct fsm *fsm, struct fsm_event *event);
 int fsm_process_events(struct fsm *fsm);
+
+void fsm_add_delayed_event(struct fsm *fsm, struct fsm_event *event);
 
 #endif /* __state_h__ */

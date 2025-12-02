@@ -102,11 +102,13 @@ static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 	fsm->events_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
 
 	STAILQ_INIT(&fsm->events_fifo);
+	STAILQ_INIT(&fsm->delayed_events_fifo);
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 
 	pthread_mutex_init(&fsm->events_mutex, &attr);
+	pthread_mutex_init(&fsm->delayed_events_mutex, &attr);
 	pthread_mutex_init(&fsm->locked_fsm, &attr);
 
 	/* Add a NULL event to the FIFO to notify user that he still needs to enter() initial state */
