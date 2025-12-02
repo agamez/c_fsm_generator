@@ -191,7 +191,7 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	const enum fsm_states *transition = (const enum fsm_states *)fsm->transitions;
 	transition += fsm->state->code * fsm->n_events + event->code; // Index fsm->transitions[fsm->state->code][event->code]
-	const struct fsm_state *new_state = fsm->states[*transition];
+	struct fsm_state *new_state = fsm->states[*transition];
 
 	if (new_state && fsm->state != new_state) {
 		fsm_exit(fsm);

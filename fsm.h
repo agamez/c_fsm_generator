@@ -63,8 +63,9 @@ struct fsm {
 	int n_events;
 
 	const struct fsm_event *events;
-	const struct fsm_state *state, *prev_state;
-	const struct fsm_state **states;
+	struct fsm_state *state;
+	const struct fsm_state *prev_state;
+	struct fsm_state **states;
 	const enum fsm_states ***transitions;
 
 	void *data;
