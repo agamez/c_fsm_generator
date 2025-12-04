@@ -180,15 +180,14 @@ int fsm_process_event(struct fsm *fsm, struct fsm_event *event)
 
 	fsm->last_event = event;
 
+	/* First, call processing function */
 	if (fsm->state->process_event_table[event->code]) {
 		ret = (fsm->state->process_event_table[event->code])(fsm);
 		if (ret < 0)
 			goto out;
 	}
 
-	/* If a new state was returned by the processing function, jump to it.
-	 * Otherwise, use the transition matrix to gather the new state */
-
+	/* And then, look for a transition */
 	const enum fsm_states *transition = (const enum fsm_states *)fsm->transitions;
 	transition += fsm->state->code * fsm->n_events + event->code; // Index fsm->transitions[fsm->state->code][event->code]
 	struct fsm_state *new_state = fsm->states[*transition];
