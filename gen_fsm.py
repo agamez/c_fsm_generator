@@ -58,15 +58,19 @@ if __name__ == "__main__":
 			dest[state] = [row, ]
 
 	transitions = dict()
+	transitions_dot = dict()
+	wildcard_transitions = []
 	with open(input_prefix + '_transitions.csv') as csvfile:
 		transitions_reader = csv.DictReader(csvfile, skipinitialspace = True)
 		for row in transitions_reader:
 			state = row.pop('State')
 			if state == '*':
-				for state in states:
-					add_to_table(transitions, state['State'], row)
+				for s in states:
+					add_to_table(transitions, s['State'], row)
+				wildcard_transitions.append(row)
 			else:
 				add_to_table(transitions, state, row)
+				add_to_table(transitions_dot, state, row)
 
 
 	processing = dict()
@@ -92,7 +96,7 @@ if __name__ == "__main__":
 
 	graphviz_template = ji2.get_template('graph.dot.j2')
 	with open(output_prefix + '_transitions.dot', 'w') as fd:
-		fd.write(graphviz_template.render(states = states, states_functions = states_functions, events = events, transitions = transitions, processing = processing, processing_functions = processing_functions, PREFIX = args['-N']))
+		fd.write(graphviz_template.render(states = states, states_functions = states_functions, events = events, transitions = transitions_dot, wildcard_transitions = wildcard_transitions, processing = processing, processing_functions = processing_functions, PREFIX = args['-N']))
 
 	# Copy non template based files
 	shutil.copyfile(gen_fsm_path + '/fsm.h', args['-O'] + '/fsm.h')

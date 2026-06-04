@@ -12,6 +12,10 @@ digraph {{fsm_prefix}}_fsm {
 	{% for st in state %}
 	{{state_name}} -> {{st.New_State}} [label = "{{st.Event}}"];
 	{% endfor %}
-
 {% endfor %}
+
+{% if wildcard_transitions %}
+	note [shape = note, style = filled, fillcolor = "#FFF3CD",
+		label = "Global transitions (from any state):\n{% for wt in wildcard_transitions %}  {{wt.Event}} -> {{wt.New_State}}\l{% endfor %}"];
+{% endif %}
 }
