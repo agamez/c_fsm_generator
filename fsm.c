@@ -38,8 +38,8 @@ int fsm_enter(struct fsm *fsm)
 	if (fsm->state->enter)
 		ret = fsm->state->enter(fsm);
 
-	uint64_t inc = 1;
-	write(fsm->state_changed_fd, &inc, sizeof(inc));
+	if (fsm->state_changed)
+		fsm->state_changed(fsm);
 
 	return ret;
 }

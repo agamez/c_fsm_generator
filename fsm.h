@@ -54,8 +54,7 @@ struct fsm_event_member {
 
 struct fsm {
 	void (*debug)(struct fsm *fsm, int priority, const char *format, va_list ap);
-	/* Can be used with epoll() to gather when state has changed */
-	int state_changed_fd;
+	void (*state_changed)(struct fsm *fsm);
 
 	const char *name;
 

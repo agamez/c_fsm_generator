@@ -99,7 +99,7 @@ static inline void {{fsm_prefix}}_fsm_init(struct fsm *fsm, void *data)
 	fsm->state = (struct fsm_state *)fsm->states[{{FSM_PREFIX}}_FSM_ST_INITIAL_STATE];
 	fsm->transitions = (const enum fsm_states ***){{fsm_prefix}}_fsm_transition;
 	fsm->data = data;
-	fsm->state_changed_fd = eventfd(0, EFD_CLOEXEC);
+	fsm->state_changed = NULL;
 	fsm->events_added_fd = eventfd(0, EFD_CLOEXEC | EFD_SEMAPHORE | EFD_NONBLOCK);
 
 	STAILQ_INIT(&fsm->events_fifo);
