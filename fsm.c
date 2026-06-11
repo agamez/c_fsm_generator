@@ -11,20 +11,29 @@
 
 void fsm_debug(struct fsm *fsm, int priority, const char *format, ...)
 {
-	if (!fsm->debug)
-		return;
-
-	/* Prepend [FSM Name] to debug message */
-	char *expanded_format = NULL;
-	int ret = asprintf(&expanded_format, "[FSM %s (%d)] %s %s", fsm->name, priority, fsm->state->name, format);
-
+	/* If there's no user debug function, debug to syslog Prepend [FSM Name] to debug message */
 	va_list args;
 	va_start(args, format);
-	if (ret > 0)
-		fsm->debug(fsm, priority, expanded_format, args);
 
-	free(expanded_format);
+	if (fsm->debug) {
+		fsm->debug(fsm, priority, format, args);
+		goto exit;
+	}
 
+	/* Prepend '[FSM Name (priority)] State' to debug message */
+	char *message = NULL;
+	char expanded_format[512] = { 0 };
+	int ret = snprintf(expanded_format, sizeof(expanded_format), "[FSM %s (%d)] %s %s", fsm->name, priority, fsm->state->name, format);
+
+	/* If we filled expanded_format, skip that, something could explode if the constructed format string is wrong */
+	if (ret < sizeof(expanded_format))
+		vasprintf(&message, expanded_format, args);
+	else
+		vasprintf(&message, format, args);
+
+	syslog(priority, message);
+
+exit:
 	va_end(args);	
 }
 
